@@ -7,5 +7,5 @@ Collaborators:
 * Magnus Knudsen
 * Marcus Langfeldt
 * Elias Dam
-
-
+* Mikkeline Havgaard
+* Magnus Bøgh
