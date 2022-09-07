@@ -3,3 +3,4 @@ AAU university project - maintaining stable pressure on carbon fiber plate throu
 
 Collaborators: 
 Magnus Knudsen
+Elias Dam
