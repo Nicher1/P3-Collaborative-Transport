@@ -3,4 +3,7 @@ AAU university project - maintaining stable pressure on carbon fiber plate throu
 
 Collaborators: 
 Magnus Knudsen
+<<<<<<< HEAD
 Marcus Langfeldt
+=======
+>>>>>>> 8e50a46053bd042533628b6669906fc71917ab0c
