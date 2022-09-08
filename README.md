@@ -9,3 +9,4 @@ Collaborators:
 * Elias Dam
 * Mikkeline Havgaard
 * Magnus Bøgh
+* Nichlas Overgaard Laugesen
