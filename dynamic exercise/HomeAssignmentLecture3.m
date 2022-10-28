@@ -1,5 +1,6 @@
 clc
 clear
+close all
 
 PI = sym(pi);
 syms t
