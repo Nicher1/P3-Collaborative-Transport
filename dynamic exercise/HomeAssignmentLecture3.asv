@@ -1,8 +1,9 @@
 clc
 clear
+close all
 
 PI = sym(pi);
-syms t
+syms t theta1(t) theta2(t)
 
 %%%%%%%%%%%%%%%%%%%%
 %
@@ -17,86 +18,126 @@ syms t
 %
 %%%%%%%%%%%%%%
 
+%animation parameters
+time_animation = 5;
+samples = 200;
+
 %Joint motion
-theta1 = 3*sin(PI*t);
-theta2 = 0.5*sin(3*PI*t+PI/4);
+theta1(t) = 3*sin(PI*t);
+theta2(t) = 0.5*sin(3*PI*t+PI/4);
 
 %Variables for link 1
 l1 = 0.5;
 m1 = 4.6;
 I1= (1/12)*m1*l1^2;
-Sc1 = [(l1/2)*cos(theta1); (l1/2)*sin(theta1); 0];
+S1(t) = [l1*cos(theta1(t)), l1*sin(theta1(t)), 0];
+Sc1(t) = [(l1/2)*cos(theta1(t)); (l1/2)*sin(theta1(t)); 0];
 
-dtheta1 = diff(theta1);
-omega1 = dtheta1;
-domega1 = diff(omega1);
+dtheta1(t) = diff(theta1(t));
+omega1(t) = dtheta1(t);
+domega1(t) = diff(omega1(t));
 
-Vc1 = diff(Sc1);
-dVc1 = diff(Vc1);
+Vc1(t) = diff(Sc1(t));
+dVc1(t) = diff(Vc1(t));
 
 %Variables for link 2
 l2 = 0.5;
 m2 = 2.3;
 I2 = (1/12)*m2*l2^2;
-Sc2 = [(l2/2)*cos(theta1+theta2); (l2/2)*sin(theta1+theta2); 0];
+Sc2(t) = [(l2/2)*cos(theta1(t)+theta2(t)); (l2/2)*sin(theta1(t)+theta2(t)); 0];
 lc2 = l2/2;
 
-dtheta2 = diff(theta2);
-ddtheta2 = diff(dtheta2);
-omega2 = dtheta1 + dtheta2;
-domega2 = diff(omega2);
+dtheta2(t) = diff(theta2(t));
+ddtheta2(t) = diff(dtheta2(t));
+omega2(t) = dtheta1(t) + dtheta2(t);
+domega2(t) = diff(omega2(t));
 
-Vc2 = [-l1*dtheta1*sin(theta1)-(dtheta1+dtheta2)*lc2*sin(theta1+theta2); l1*dtheta1*cos(theta1)+(dtheta1+dtheta2)*lc2*cos(theta1+theta2); 0];
-dVc2 = diff(Vc2);
+Vc2(t) = [-l1*dtheta1(t)*sin(theta1(t))-(dtheta1(t)+dtheta2(t))*lc2*sin(theta1(t)+theta2(t)); l1*dtheta1(t)*cos(theta1(t))+(dtheta1(t)+dtheta2(t))*lc2*cos(theta1(t)+theta2(t)); 0];
+dVc2(t) = diff(Vc2(t));
 
 g = [0; -9.8; 0];
 
 %Forward kinematics
+S1_x(t) = l1*cos(theta1(t));
+S1_y(t) = l1*sin(theta1(t));
+S2_x(t) = l2*cos(theta1(t)+theta2(t));
+S2_y(t) = l2*sin(theta1(t)+theta2(t));
 
-S1_x = l1*cos(theta1);
-S1_y = l1*sin(theta1);
-S2_x = l2*cos(theta1+theta2);
-S2_y = l2*sin(theta1+theta2);
+%position of EE, its velocity and acceleration
+EE_x(t) = S1_x(t)+S2_x(t);
+EE_y(t) = S1_y(t)+S2_y(t);
 
-EE_x(t) = S1_x+S2_x;
-EE_y(t) = S1_y+S2_y;
+dEE_x(t) = diff(EE_x(t));
+dEE_y(t) = diff(EE_y(t));
 
-dEE_x(t) = diff(EE_x);
-dEE_y(t) = diff(EE_y);
+ddEE_x(t) = diff(dEE_x(t));
+ddEE_y(t) = diff(dEE_y(t));
 
-ddEE_x(t) = diff(dEE_x);
-ddEE_y(t) = diff(dEE_y);
+%vectors for storing the symbolic functions as discrete values
+S1_dis = [];
+EE_dis = [];
+dEE_dis = [];
+ddEE_dis = [];
 
-time_animation = 5;
-samples = 100;
+k = 1;
+for i = linspace(1,time_animation,samples)
+    S1_dis(k,1) = S1_x(i);
+    S1_dis(k,2) = S1_y(i);
 
-EE_dis_x = [];
-EE_dis_y = [];
+    EE_dis(k,1) = EE_x(i);
+    EE_dis(k,2) = EE_y(i);
 
-for i = linspace(0,time_animation,samples)
-    
+    dEE_dis(k,1) = dEE_x(i);
+    dEE_dis(k,2) = dEE_y(i);
 
-    EE_dis_x(end+1) = EE_x(i);
-    EE_dis_y(end+1) = EE_y(i);
+    ddEE_dis(k,1) = ddEE_x(i);
+    ddEE_dis(k,2) = ddEE_y(i);
+    k = k+1;
 end
 
-for i = 1:samples
-    figure(2)
-    S1_x(i)
-    S1_y(i)
-    plot([0,S1_x(i)],[0,S1_y(i)],'k-+')
-    xlim([-2 2])
-    ylim([-2 2])
-    grid on
-    pause(0.05)
-end
+dEE_dis = normalize(dEE_dis)
+ddEE_dis = normalize(ddEE_dis)
+
 
 %Torque calculation
 
-tau2 = I2*domega2+planarCross(Sc2, (m2*dVc2-m2*g));
+tau2(t) = I2*domega2(t)+planarCross(Sc2(t), (m2*dVc2(t)-m2*g));
 
 
-tau1 = I1*domega1+tau2+planarCross(Sc1, (m1*dVc1))-planarCross(Sc1, m1*g)+planarCross(S1, m2*dVc2)-planarCross(S1, m2*g);
+tau1(t) = I1*domega1(t)+tau2(t)+planarCross(Sc1(t), (m1.*dVc1(t)))-planarCross(Sc1(t), m1.*g)+planarCross(S1(t), m2.*dVc2(t))-planarCross(S1(t), m2.*g);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Plot functions for EE, velocity and acceleration
+
+for i = 1:samples
+    figure(2)
+    plot([0,S1_dis(i,1),EE_dis(i,1)],[0,S1_dis(i,2),EE_dis(i,2)],'k-+');
+    hold on
+    plot([EE_dis(i,1),dEE_dis(i,1)],[EE_dis(i,2),dEE_dis(i,2)],"r")
+    plot([EE_dis(i,1),ddEE_dis(i,1)],[EE_dis(i,2),ddEE_dis(i,2)],"b")
+    hold off
+    xlim([-2 2])
+    ylim([-2 2])
+    grid on
+  
+    pause(0.03)
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Plot functions for torques
+
+%Plot for Tau 1
+figure('Name', "Torque", 'NumberTitle', 'off')
+fplot(tau1(t), [0 5], "b")
+hold on
+
+%Plot for Tau 2
+fplot(tau2(t), [0 5], "r")
+legend("Tau1", "Tau2")
+title("Torque")
+ylabel("Torque in Nm")
+xlabel("Time in seconds")
+hold on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Plot functions for thetas
@@ -104,11 +145,11 @@ tau1 = I1*domega1+tau2+planarCross(Sc1, (m1*dVc1))-planarCross(Sc1, m1*g)+planar
 %Plot for theta1
 figure('Name', "Thetas", 'NumberTitle', 'off')
 subplot(3, 1, 1)
-fplot(theta1, [0 5], "b")
+fplot(theta1(t), [0 5], "b")
 hold on
 
 %Plot for theta2
-fplot(theta2, [0 5], "r")
+fplot(theta2(t), [0 5], "r")
 legend("Joint 1", "Joint 2")
 title("Positions")
 ylabel("Angle in radians")
@@ -118,11 +159,11 @@ hold on
 %Velocity plots
 %Plot for dtheta1
 subplot(3, 1, 2)
-fplot(dtheta1, [0 5], "b")
+fplot(dtheta1(t), [0 5], "b")
 hold on
 
 %Plot for dtheta2
-fplot(dtheta2, [0 5], "r")
+fplot(dtheta2(t), [0 5], "r")
 legend("Joint 1", "Joint 2")
 title("Velocities")
 ylabel("Angle in radians")
@@ -141,25 +182,7 @@ legend("Joint 1", "Joint 2")
 title("Accelerations")
 ylabel("Angle in radians")
 xlabel("Time in seconds")
-hold on
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Plot functions for EE
+hold off
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Plot functions for torques
 
-%Plot for Tau 1
-figure('Name', "Torque", 'NumberTitle', 'off')
-subplot(2, 1, 1)
-fplot(tau1, [0 5], "b")
-hold on
-
-%Plot for Tau 2
-fplot(tau2, [0 5], "r")
-legend("Tau1", "Tau2")
-title("Torque")
-ylabel("Torque in Nm")
-xlabel("Time in seconds")
-hold on
