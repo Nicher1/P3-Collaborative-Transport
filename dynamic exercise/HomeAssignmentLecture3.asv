@@ -73,14 +73,13 @@ dEE_y(t) = diff(EE_y(t));
 ddEE_x(t) = diff(dEE_x(t));
 ddEE_y(t) = diff(dEE_y(t));
 
-%arrays for storing the symbolic functions as discrete values
+%vectors for storing the symbolic functions as discrete values
 S1_dis = [];
 EE_dis = [];
 dEE_dis = [];
 ddEE_dis = [];
 
 k = 1;
-%loop for transfering the symbolic functions into the arrays
 for i = linspace(1,time_animation,samples)
     S1_dis(k,1) = S1_x(i);
     S1_dis(k,2) = S1_y(i);
@@ -96,9 +95,14 @@ for i = linspace(1,time_animation,samples)
     k = k+1;
 end
 
+dEE_dis = normalize(dEE_dis)
+ddEE_dis = normalize(ddEE_dis)
+
+
 %Torque calculation
 
 tau2(t) = I2*domega2(t)+planarCross(Sc2(t), (m2*dVc2(t)-m2*g));
+
 
 tau1(t) = I1*domega1(t)+tau2(t)+planarCross(Sc1(t), (m1.*dVc1(t)))-planarCross(Sc1(t), m1.*g)+planarCross(S1(t), m2.*dVc2(t))-planarCross(S1(t), m2.*g);
 
