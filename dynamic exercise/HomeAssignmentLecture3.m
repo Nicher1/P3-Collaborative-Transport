@@ -116,6 +116,10 @@ for i = 1:samples
     hold off
     xlim([-2 2])
     ylim([-2 2])
+    title("Manipulator Position Visualisation")
+    legend("Position(m)", "Velocity(m/s)", "Acceleration(m/s^2)")
+    xlabel("x(m)")
+    ylabel("y(m)")
     grid on
   
     pause(0.03)
