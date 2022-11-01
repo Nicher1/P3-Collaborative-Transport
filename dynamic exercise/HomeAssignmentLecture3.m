@@ -88,13 +88,15 @@ for i = linspace(1,time_animation,samples)
     EE_dis(k,1) = EE_x(i);
     EE_dis(k,2) = EE_y(i);
 
-    dEE_dis(k,1) = dEE_x(i);
-    dEE_dis(k,2) = dEE_y(i);
+    dEE_dis(k,1) = dEE_x(i)/20;
+    dEE_dis(k,2) = dEE_y(i)/20;
 
-    ddEE_dis(k,1) = ddEE_x(i);
-    ddEE_dis(k,2) = ddEE_y(i);
+    ddEE_dis(k,1) = ddEE_x(i)/50;
+    ddEE_dis(k,2) = ddEE_y(i)/50;
     k = k+1;
 end
+
+
 
 %Torque calculation
 
