@@ -1,4 +1,3 @@
-from pyexpat import model
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -11,7 +10,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 mp_pose = mp.solutions.pose
-
+'''
 cnt = connected_device_count()
 if not cnt:
     print("No devices available")
@@ -22,8 +21,9 @@ for device_id in range(cnt):
     device.open()
     print(f"{device_id}: {device.serial}")
     device.close()
-
+'''
 def main():
+    '''
     k4a = PyK4A(
         Config(
             color_resolution=pyk.ColorResolution.RES_720P,
@@ -32,13 +32,13 @@ def main():
         )
     )
     k4a.start()
-h
+    
     k4a.whitebalance = 4500
     assert k4a.whitebalance==4500
     k4a.whitebalance = 4510
     assert k4a.whitebalance == 4510
-
-    cap = cv.VideoCapture(0)
+    '''
+    cap = cv.VideoCapture('Bøgh.jpg')
 
     with mp_hands.Hands(
         model_complexity=0,
@@ -53,6 +53,7 @@ h
                 success, image=cap.read()
                 if not success:
                     print("Ignoring empty camera frame.")
+                    quit()
                     continue
             
                 image.flags.writeable=False
@@ -76,10 +77,19 @@ h
                     mp_pose.POSE_CONNECTIONS,
                     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
-
                 # your code here
-
-
+                LandResults = []
+                for id, lm in enumerate(result.pose_landmarks.landmark):
+                    LandResults.append([])
+                    x= int(lm.x*image.shape[1])
+                    y= int(lm.y*image.shape[0])
+                    LandResults[id].append(y)
+                    LandResults[id].append(x)
+                    
+                for y, row in enumerate(LandResults):
+                    print(row)
+                print((LandResults[2])[1])
+                
                 cv.imshow('MediaPipe', cv.flip(image,1))
                 if cv.waitKey(5) & 0xFF == 27:
                     break
