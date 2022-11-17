@@ -77,7 +77,7 @@ def main():
                         resultPose= pose.process(cap)
                         resultHands = hands.process(cap)
 
-                        if not resultHands.pose_landmarks:
+                        if not resultPose.pose_landmarks:
                             continue
                         
                         annotated_image = cap.copy()
