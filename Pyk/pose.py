@@ -88,7 +88,7 @@ def main():
                     
                 for y, row in enumerate(LandResults):
                     print(row)
-                print((LandResults[2])[1])
+                print((LandResults[0])[1])
                 
                 cv.imshow('MediaPipe', cv.flip(image,1))
                 if cv.waitKey(5) & 0xFF == 27:
