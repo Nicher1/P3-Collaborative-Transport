@@ -46,8 +46,10 @@ def main():
             cv.imshow("k4a", helpers.color(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
             cv.waitKey(0)
             cap = cv.imread(k4aCapture.depth)
-            #cap = cv.VideoCapture(k4aCapture.depth)
-            break
+            
+            
+            cap = cv.VideoCapture(k4aCapture.color)
+            
 
             with mp_hands.Hands(
                 model_complexity=0,
