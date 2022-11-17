@@ -91,22 +91,22 @@ def main():
                         # your code here
 
 
-                # your code here
-                LandResults = []
-                for id, lm in enumerate(result.pose_landmarks.landmark):
-                    LandResults.append([])
-                    x= int(lm.x*image.shape[1])
-                    y= int(lm.y*image.shape[0])
-                    LandResults[id].append(y)
-                    LandResults[id].append(x)
-                    
-                for y, row in enumerate(LandResults):
-                    print(row)
-                print((LandResults[0])[1])
-                
-                cv.imshow('MediaPipe', cv.flip(image,1))
-                if cv.waitKey(5) & 0xFF == 27:
-                    break
+                        # your code here
+                        LandResults = []
+                        for id, lm in enumerate(result.pose_landmarks.landmark):
+                            LandResults.append([])
+                            x= int(lm.x*image.shape[1])
+                            y= int(lm.y*image.shape[0])
+                            LandResults[id].append(y)
+                            LandResults[id].append(x)
+                            
+                        for y, row in enumerate(LandResults):
+                            print(row)
+                        print((LandResults[0])[1])
+                        
+                        cv.imshow('MediaPipe', cv.flip(image,1))
+                        if cv.waitKey(5) & 0xFF == 27:
+                            break
 
 if __name__=="__main__":
     main()
