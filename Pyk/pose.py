@@ -1,5 +1,3 @@
-import time
-from pyexpat import model
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -8,6 +6,7 @@ from pyk4a import PyK4A, connected_device_count
 from pyk4a import Config
 from time import perf_counter
 from helpers import colorize
+
 
 
 mp_drawing = mp.solutions.drawing_utils
