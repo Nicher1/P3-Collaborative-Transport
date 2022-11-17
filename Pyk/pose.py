@@ -7,8 +7,7 @@ import pyk4a as pyk
 from pyk4a import PyK4A, connected_device_count
 from pyk4a import Config
 from time import perf_counter
-from helpers import colorize
-
+import helpers
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -45,7 +44,7 @@ def main():
     while True:
         k4aCapture = k4a.get_capture()
         if np.any(k4aCapture.depth):
-            cv.imshow("k4a", colorize(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
+            cv.imshow("k4a", helpers.color(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
             cv.waitKey(0)
             cap = cv.imread(k4aCapture.depth)
             #cap = cv.VideoCapture(k4aCapture.depth)
