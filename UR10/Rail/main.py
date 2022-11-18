@@ -93,22 +93,37 @@ def getReadyToMove():
     # sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 131, 0, 0, 0, 0, 2, 184, 11]))
 
 def targetPosition(target, rw=1):
-    targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 1, 0xc8]
-    targetPos_array = bytearray(targetPos)
-    sendCommand(targetPos_array)
 
-    # Execute command
-    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 64, 0, 0, 0, 0, 2, 31, 0]))
+    def extractBytes(integer):
+        return divmod(integer, 0x100)
 
-    time.sleep(1)
+    # Check if target datavalue is within range
+    if target > 0xffff:
+        print("Invalid target specified")
+    else:
+        if target > 255:
+            hex(target)
+            targetleft = extractBytes(target)[1]
+            targetright = extractBytes(target)[0]
+            targetPos = [0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 2, targetleft, targetright]
+        elif target <= 255:
+            targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 1, target]
 
-    # Check Statusword for target reached
-    while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 96, 65, 0, 0, 0, 0, 2, 39, 22]):
-        print("wait for next command")
-        # 1 second delay
+        targetPos_array = bytearray(targetPos)
+        sendCommand(targetPos_array)
+
+        # Execute command
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 64, 0, 0, 0, 0, 2, 31, 0]))
+
         time.sleep(1)
 
-    sendCommand(enableOperation_array)
+        # Check Statusword for target reached
+        while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 96, 65, 0, 0, 0, 0, 2, 39, 22]):
+            print("wait for next command")
+            # 1 second delay
+            time.sleep(1)
+
+        sendCommand(enableOperation_array)
 
 #Definition of the function to send and receive data
 def sendCommand(data):
