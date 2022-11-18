@@ -39,15 +39,6 @@ k4a.start()
 
 
 def main():
-    k4a = PyK4A(
-        Config(
-            color_resolution=pyk.ColorResolution.RES_720P,
-            depth_mode=pyk.DepthMode.NFOV_UNBINNED,
-            synchronized_images_only=True,
-            camera_fps=pyk.FPS.FPS_5
-        )
-    )
-    k4a.start()
     k4a.whitebalance = 4500
     assert k4a.whitebalance==4500
     k4a.whitebalance = 4510
