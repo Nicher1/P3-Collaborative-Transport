@@ -13,6 +13,17 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 mp_pose = mp.solutions.pose
 
+cnt = connected_device_count()
+if not cnt:
+    print("No devices available")
+    exit()
+print(f"Available devices: {cnt}")
+for device_id in range(cnt):
+    device = PyK4A(device_id=device_id)
+    device.open()
+    print(f"{device_id}: {device.serial}")
+    device.close()
+
 def main():
     while True:
 
