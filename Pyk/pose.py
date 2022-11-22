@@ -7,6 +7,8 @@ from pyk4a import Config
 from time import perf_counter
 import helpers
 
+InnerThresh = 0.05
+OuterThresh = 0.1
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -65,21 +67,35 @@ def main():
                     LandResults[id].append(x)
                     Idx.append(id)
 
-                #DrawSelect =[LandResults[11],LandResults[12],LandResults[13],LandResults[14],LandResults[15],LandResults[16], LandResults[23],LandResults[24]]
-                DrawSelect =[LandResults[15],LandResults[16]]
 
-                print(DrawSelect)
+
+                DrawSelect =[LandResults[15],LandResults[16]]
                 IdSelect = [Idx[11],Idx[12],Idx[13],Idx[14],Idx[15],Idx[16], Idx[23],Idx[24]]
+                
+                Center = [image.shape[0]/2,image.shape[1]/2]
+                OuterBox = [int(np.rint(Center[0]*(1-OuterThresh))),int(np.rint(Center[1]*(1-OuterThresh))), int(np.rint(Center[0]*(1+OuterThresh))),int(np.rint(Center[1]*(1+OuterThresh)))]
+                InnerBox = [int(np.rint(Center[0]*(1-InnerThresh))),int(np.rint(Center[1]*(1-InnerThresh))), int(np.rint(Center[0]*(1+InnerThresh))),int(np.rint(Center[1]*(1+InnerThresh)))]
 
                 averaveX = int(np.rint((LandResults[15][1]+LandResults[16][1])/2))
                 averageY = int(np.rint((LandResults[15][0]+LandResults[16][0])/2))
+                cv.rectangle(image, (OuterBox[1],OuterBox[0]),(OuterBox[3],OuterBox[2]),(0,0,255),-1)
+                cv.rectangle(image, (InnerBox[1],InnerBox[0]), (InnerBox[3],InnerBox[2]),(255,0,0),-1)
                 cv.circle(image, (averaveX, averageY), 5, (0,255,0), -1)
-                print(averaveX, averageY)
+
+                if averaveX > 288 and averaveX < 352 and averageY > 216 and averageY < 264:
+                    if averaveX > 304 and averaveX < 336 and averageY > 228 and averageY < 252:
+                        print("blå")
+                    else: 
+                        print("rød")
+                else:
+                    print(Center[0]-averageY, Center[1]-averaveX)
+
                 for i in range(len(DrawSelect)):
                     cv.circle(image, (DrawSelect[i][1],DrawSelect[i][0]),5,(0,255,0),-1)
                     cv.putText(image, str(IdSelect[i]),(DrawSelect[i][1],DrawSelect[i][0]),cv.FONT_HERSHEY_PLAIN,1,(255,0,0),2)
-                
+
                 cv.imshow('MediaPipe', cv.flip(image,1))
+                cv.imshow("temp", temp)
                 if cv.waitKey(5) & 0xFF == 27:
                     quit()
 
