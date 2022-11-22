@@ -25,20 +25,20 @@ for device_id in range(cnt):
     print(f"{device_id}: {device.serial}")
     device.close()
 
-k4a = PyK4A(
-    Config(
-    color_resolution=pyk.ColorResolution.RES_720P,
-    camera_fps=pyk.FPS.FPS_30,
-    depth_mode=pyk.DepthMode.NFOV_UNBINNED,
-    synchronized_images_only=True,
-   # pyk.ImageFormat
-    )
-)
-k4a.start()
-
 
 
 def main():
+    k4a = PyK4A(
+        Config(
+        color_resolution=pyk.ColorResolution.RES_720P,
+        camera_fps=pyk.FPS.FPS_30,
+        depth_mode=pyk.DepthMode.NFOV_UNBINNED,
+        synchronized_images_only=True,
+    # pyk.ImageFormat
+        )
+    )
+
+    k4a.start()
     k4a.whitebalance = 4500
     assert k4a.whitebalance==4500
     k4a.whitebalance = 4510
@@ -48,10 +48,15 @@ def main():
 
     while True:
         k4aCapture = k4a.get_capture()
-        if np.any(k4aCapture.depth):
-            cv.imshow("k4a", helpers.color(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
+        if np.any(k4aCapture.color):
+            tempCap = k4aCapture.color
+            
+            cap = tempCap[:, :, 0:3]
+
+            print("cap", cap)
+
+            cv.imshow("cap", cap)
             cv.waitKey(0)
-            cap = cv.imread(k4aCapture.color)
 
             with mp_hands.Hands(
                 static_image_mode = True,
@@ -86,6 +91,7 @@ def main():
                             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
                     cv.imshow("image", annotated_image)
                     cv.waitKey(0)
+
 
 if __name__ == '__main__':
     main()
