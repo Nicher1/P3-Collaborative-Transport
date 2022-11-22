@@ -93,14 +93,16 @@ def getReadyToMove():
     # sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 131, 0, 0, 0, 0, 2, 184, 11]))
 
 def targetPosition(target, rw=1):
+    sendCommand(enableOperation_array)
 
     def extractBytes(integer):
-        return divmod(integer, 0x100)
+        return divmod(integer, 0x100)[::-1]
 
     # Check if target datavalue is within range
     if target > 0xffff:
         print("Invalid target specified")
     else:
+<<<<<<< Updated upstream
         if target > 255:
             hex(target)
             targetleft = extractBytes(target)[1]
@@ -109,16 +111,44 @@ def targetPosition(target, rw=1):
         elif target <= 255:
             targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 1, target]
         print(f"TargetPos = {targetPos}")
+=======
+        if target > 0xff:
+            target2Byt = extractBytes(target)
+            targetPos = [0, 0, 0, 0, 0, 17, 0, 43, 15, rw, 0, 0, 96, 122, 0, 0, 0, 0, 4, 0, 0, target2Byt[0], target2Byt[1]]
+        elif target <= 0xff:
+            targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 1, target]
+>>>>>>> Stashed changes
         targetPos_array = bytearray(targetPos)
         sendCommand(targetPos_array)
-
+        # set velocity and acceleration of profile
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x81, 0, 0, 0, 0, 2, 0xF4, 0x01]))
+        # Profile acceleration set below
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x83, 0, 0, 0, 0, 2, 0xb8, 0x0b]))
+        # Profile deacceleration set below
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x84, 0, 0, 0, 0, 2, 0xb8, 0x0b]))
+        # Position printed below
+        # sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4]))
+        
+        # set velocity target
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 2, 0xF4, 0x01]))
+        
+        print("My location:")
+        myLoc = sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4]))
+        print("targetpos:")
+        targetLoc = sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 4]))
+        
+        # while sendCommand(status_array) != 
+        
         # Execute command
+<<<<<<< Updated upstream
         sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
+=======
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
+>>>>>>> Stashed changes
 
         time.sleep(1)
-
         # Check Statusword for target reached
-        while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 96, 65, 0, 0, 0, 0, 2, 39, 22]):
+        while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 0x60, 0x41, 0, 0, 0, 0, 2, 39, 22]):
             print("wait for next command")
             # 1 second delay
             time.sleep(1)
@@ -150,19 +180,20 @@ def homing():
     # Set feed revolutions 6092h_02h
     # sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 96, 146, 2, 0, 0, 0, 1, 1]))
 
-    # # Set speeds 6099h
-    sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 96, 153, 1, 0, 0, 0, 1, 0xc8]))
-    sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 96, 153, 2, 0, 0, 0, 1, 0xc8]))
+    # # Set homing speeds 6099h
+    sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 0x60, 0x99, 0, 0, 0, 0, 1, 0x02]))
+    sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 0x60, 0x99, 1, 0, 0, 0, 1, 0xfa]))
+    sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 0x60, 0x99, 2, 0, 0, 0, 1, 0xc8]))
 
     # # Set acceleration 609Ah
-    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 154, 0, 0, 0, 0, 2, 0xe8, 0x3]))
+    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x9a, 0, 0, 0, 0, 2, 0xe8, 0x3]))
 
     time.sleep(1)
     print("About to home")
     # Start Homing 6040h
-    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 64, 0, 0, 0, 0, 2, 31, 0]))
-
-    while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 96, 65, 0, 0, 0, 0, 2, 39, 22]):
+    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
+  
+    while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 0x60, 0x41, 0, 0, 0, 0, 2, 39, 22]):
         print("wait for Homing to end")
         # 1 second delay
         time.sleep(1)
@@ -178,9 +209,11 @@ def homing():
 #
 # togglePower()
 startProcedure()
-
 homing()
-
 getReadyToMove()
+<<<<<<< Updated upstream
 
 targetPosition(256)
+=======
+targetPosition(5000)
+>>>>>>> Stashed changes
