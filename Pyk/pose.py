@@ -12,7 +12,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 mp_pose = mp.solutions.pose
-
+'''
 cnt = connected_device_count()
 if not cnt:
     print("No devices available")
@@ -23,90 +23,65 @@ for device_id in range(cnt):
     device.open()
     print(f"{device_id}: {device.serial}")
     device.close()
-
+'''
 def main():
-    k4a = PyK4A(
-        Config(
-            color_resolution=pyk.ColorResolution.RES_720P,
-            depth_mode=pyk.DepthMode.NFOV_UNBINNED,
-            synchronized_images_only=True,
-            camera_fps=pyk.FPS.FPS_5
-
-        )
-    )
-    k4a.start()
-    k4a.whitebalance = 4500
-    assert k4a.whitebalance==4500
-    k4a.whitebalance = 4510
-    assert k4a.whitebalance == 4510
-
     while True:
-        k4aCapture = k4a.get_capture()
-        if np.any(k4aCapture.depth):
-            cv.imshow("k4a", helpers.color(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
-            cv.waitKey(0)
-            cap = cv.imread(k4aCapture.depth)
-            
-            
-            cap = cv.VideoCapture(k4aCapture.color)
-            
 
-            with mp_hands.Hands(
-                model_complexity=0,
-                min_detection_confidence=0.5,
-                min_tracking_confidence=0.5) as hands:
-                with mp_pose.Pose(
-                model_complexity=0,
-                min_detection_confidence=0.5,
-                min_tracking_confidence=0.5) as pose:
+        cap = cv.VideoCapture(0)
+        
 
-                    while cap.isOpened():
-                        success, image=cap.read()
-                        if not success:
-                            print("Ignoring empty camera frame.")
-                            continue
+        with mp_pose.Pose(
+        model_complexity=0,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5) as pose:
 
-                        image.flags.writeable=False
-                        image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-                        resultHands = hands.process(image)
-                        result = pose.process(image)
+            while cap.isOpened():
+                success, image=cap.read()
+                if not success:
+                    print("Ignoring empty camera frame.")
+                    continue
+                temp = image.copy()
 
-                        image.flags.writeable=True
-                        image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-                        if resultHands.multi_hand_landmarks:
-                            for hand_landmarks in resultHands.multi_hand_landmarks:
-                                mp_drawing.draw_landmarks(
-                                    image,
-                                    hand_landmarks,
-                                    mp_hands.HAND_CONNECTIONS,
-                                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                                    mp_drawing_styles.get_default_hand_connections_style())
-                        mp_drawing.draw_landmarks(
-                            image,
-                            result.pose_landmarks,
-                            mp_pose.POSE_CONNECTIONS,
-                            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+                image.flags.writeable=False
+                image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+                result = pose.process(image)
 
+                image.flags.writeable=True
+                image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+                
+                mp_drawing.draw_landmarks(
+                    temp,
+                    result.pose_landmarks,
+                    mp_pose.POSE_CONNECTIONS)
+                
+                # your code here
+                LandResults = []
+                Idx = []
+                for id, lm in enumerate(result.pose_landmarks.landmark):
+                    LandResults.append([])
+                    x= int(lm.x*image.shape[1])
+                    y= int(lm.y*image.shape[0])
+                    LandResults[id].append(y)
+                    LandResults[id].append(x)
+                    Idx.append(id)
 
-                        # your code here
+                #DrawSelect =[LandResults[11],LandResults[12],LandResults[13],LandResults[14],LandResults[15],LandResults[16], LandResults[23],LandResults[24]]
+                DrawSelect =[LandResults[15],LandResults[16]]
 
+                print(DrawSelect)
+                IdSelect = [Idx[11],Idx[12],Idx[13],Idx[14],Idx[15],Idx[16], Idx[23],Idx[24]]
 
-                        # your code here
-                        LandResults = []
-                        for id, lm in enumerate(result.pose_landmarks.landmark):
-                            LandResults.append([])
-                            x= int(lm.x*image.shape[1])
-                            y= int(lm.y*image.shape[0])
-                            LandResults[id].append(y)
-                            LandResults[id].append(x)
-                            
-                        for y, row in enumerate(LandResults):
-                            print(row)
-                        print((LandResults[0])[1])
-                        
-                        cv.imshow('MediaPipe', cv.flip(image,1))
-                        if cv.waitKey(5) & 0xFF == 27:
-                            break
+                averaveX = int(np.rint((LandResults[15][1]+LandResults[16][1])/2))
+                averageY = int(np.rint((LandResults[15][0]+LandResults[16][0])/2))
+                cv.circle(image, (averaveX, averageY), 5, (0,255,0), -1)
+                print(averaveX, averageY)
+                for i in range(len(DrawSelect)):
+                    cv.circle(image, (DrawSelect[i][1],DrawSelect[i][0]),5,(0,255,0),-1)
+                    cv.putText(image, str(IdSelect[i]),(DrawSelect[i][1],DrawSelect[i][0]),cv.FONT_HERSHEY_PLAIN,1,(255,0,0),2)
+                
+                cv.imshow('MediaPipe', cv.flip(image,1))
+                if cv.waitKey(5) & 0xFF == 27:
+                    quit()
 
 if __name__=="__main__":
     main()
