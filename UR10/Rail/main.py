@@ -102,7 +102,6 @@ def targetPosition(target, rw=1):
     if target > 0xffff:
         print("Invalid target specified")
     else:
-<<<<<<< Updated upstream
         if target > 255:
             hex(target)
             targetleft = extractBytes(target)[1]
@@ -111,13 +110,13 @@ def targetPosition(target, rw=1):
         elif target <= 255:
             targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 1, target]
         print(f"TargetPos = {targetPos}")
-=======
+
         if target > 0xff:
             target2Byt = extractBytes(target)
             targetPos = [0, 0, 0, 0, 0, 17, 0, 43, 15, rw, 0, 0, 96, 122, 0, 0, 0, 0, 4, 0, 0, target2Byt[0], target2Byt[1]]
         elif target <= 0xff:
             targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 1, target]
->>>>>>> Stashed changes
+
         targetPos_array = bytearray(targetPos)
         sendCommand(targetPos_array)
         # set velocity and acceleration of profile
@@ -140,11 +139,10 @@ def targetPosition(target, rw=1):
         # while sendCommand(status_array) != 
         
         # Execute command
-<<<<<<< Updated upstream
+
         sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
-=======
+
         sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
->>>>>>> Stashed changes
 
         time.sleep(1)
         # Check Statusword for target reached
@@ -211,9 +209,6 @@ def homing():
 startProcedure()
 homing()
 getReadyToMove()
-<<<<<<< Updated upstream
 
 targetPosition(256)
-=======
 targetPosition(5000)
->>>>>>> Stashed changes
