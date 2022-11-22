@@ -102,15 +102,6 @@ def targetPosition(target, rw=1):
     if target > 0xffff:
         print("Invalid target specified")
     else:
-        if target > 255:
-            hex(target)
-            targetleft = extractBytes(target)[1]
-            targetright = extractBytes(target)[0]
-            targetPos = [0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 2, targetleft, targetright]
-        elif target <= 255:
-            targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 1, target]
-        print(f"TargetPos = {targetPos}")
-
         if target > 0xff:
             target2Byt = extractBytes(target)
             targetPos = [0, 0, 0, 0, 0, 17, 0, 43, 15, rw, 0, 0, 96, 122, 0, 0, 0, 0, 4, 0, 0, target2Byt[0], target2Byt[1]]
@@ -139,9 +130,6 @@ def targetPosition(target, rw=1):
         # while sendCommand(status_array) != 
         
         # Execute command
-
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
-
         sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
 
         time.sleep(1)
@@ -209,6 +197,4 @@ def homing():
 startProcedure()
 homing()
 getReadyToMove()
-
 targetPosition(256)
-targetPosition(5000)
