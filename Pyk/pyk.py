@@ -38,7 +38,7 @@ for device_id in range(cnt):
 k4a = PyK4A(
         Config(
         color_resolution=pyk.ColorResolution.RES_720P,
-        camera_fps=pyk.FPS.FPS_5,
+        camera_fps=pyk.FPS.FPS_30,
         depth_mode=pyk.DepthMode.NFOV_UNBINNED,
         synchronized_images_only=True,
         )
@@ -79,18 +79,27 @@ def main():
             
             res, fingertips, stuff = detectHands(cap)
 
-            Center = stuff[0]
-            centerDiff = stuff[1]
-            meany = stuff[2]
-            meanx = stuff[3]
-
+            res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
             end = perf_counter()
             print(end-start)
             cv.imshow("res",res)
             cv.waitKey(1)
 
-            if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
-                if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
+            #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
+            if np.any(stuff) != 0:
+                Center = stuff[0]
+                centerDiff = stuff[1]
+                meany = stuff[2]
+                meanx = stuff[3]
+
+                if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
+                    if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
+                        doStuff = False
+                    else:
+                        doStuff = False
+
+                else:
+                    doStuff = True
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img):
@@ -153,8 +162,7 @@ def detectHands(Input_img):
         else:
             print(Center[0]-averageY, Center[1]-averaveX)
         '''
-    centerDiff = 1
-    paperbin = [Center, centerDiff, meany, meanx]
+    paperbin = [0, 0, 0, 0]
 
     return forHand, fingertips, paperbin
 
