@@ -47,6 +47,7 @@ def main():
                 image.flags.writeable=False
                 image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
                 result = pose.process(image)
+                print(result.pose_landmarks)
 
                 image.flags.writeable=True
                 image = cv.cvtColor(image, cv.COLOR_RGB2BGR)

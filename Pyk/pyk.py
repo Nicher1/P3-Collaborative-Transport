@@ -89,6 +89,29 @@ def main():
                             resultPose.pose_landmarks,
                             mp_pose.POSE_CONNECTIONS,
                             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+                        LandResults = []
+                        Idx = []
+                        for id, lm in enumerate(resultPose.pose_landmarks.landmark):
+                            LandResults.append([])
+                            x= int(lm.x*cap.shape[1])
+                            y= int(lm.y*cap.shape[0])
+                            LandResults[id].append(y)
+                            LandResults[id].append(x)
+                            Idx.append(id)
+
+                        Center = [image.shape[0]/2,image.shape[1]/2]
+                        averaveX = int(np.rint((LandResults[15][1]+LandResults[16][1])/2))
+                        averageY = int(np.rint((LandResults[15][0]+LandResults[16][0])/2))
+
+                        if averaveX > 288 and averaveX < 352 and averageY > 216 and averageY < 264:
+                            if averaveX > 304 and averaveX < 336 and averageY > 228 and averageY < 252:
+                                print("blå")
+                            else: 
+                                print("rød")
+                        else:
+                            print(Center[0]-averageY, Center[1]-averaveX)
+                            
                     cv.imshow("image", annotated_image)
                     cv.waitKey(0)
 
