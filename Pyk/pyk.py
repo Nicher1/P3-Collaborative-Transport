@@ -77,9 +77,8 @@ def main():
 
             start = perf_counter()
             
-            res, diff = detectHands(cap)
-
-            print(diff)
+            
+            res = detectHands(cap)
 
             end = perf_counter()
             print(end-start)
@@ -131,17 +130,17 @@ def detectHands(Input_img):
                     print("blå")
                     centerDiff = False
                     print("inner if", type(centerDiff), type(forHand))
-                    return forHand, centerDiff
+                    return forHand
 
                 else: 
                     print("rød")
                     centerDiff = False
                     print("inner else", type(centerDiff), type(forHand))
-                    return forHand, centerDiff
+                    return forHand
 
             else:
                 if len(centerDiff) == 2:
-                    return forHand, centerDiff[0], centerDiff[1]
+                    return forHand
                 else:
                     print(centerDiff)
                     pass
