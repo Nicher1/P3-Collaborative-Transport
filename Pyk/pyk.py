@@ -38,7 +38,7 @@ for device_id in range(cnt):
 k4a = PyK4A(
         Config(
         color_resolution=pyk.ColorResolution.RES_720P,
-        camera_fps=pyk.FPS.FPS_30,
+        camera_fps=pyk.FPS.FPS_15,
         depth_mode=pyk.DepthMode.NFOV_UNBINNED,
         synchronized_images_only=True,
         )
@@ -81,7 +81,6 @@ def main():
 
             res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
             end = perf_counter()
-            print(end-start)
             cv.imshow("res",res)
             cv.waitKey(1)
 
@@ -146,7 +145,6 @@ def detectHands(Input_img):
             meanx = int((handPos[1] + handPos[3])/2)
             cv.circle(forHand, (meanx, meany), 4, (0, 255, 0), -1)
             centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
-            print(centerDiff)
 
             paperbin = [Center, centerDiff, meany, meanx]
             
