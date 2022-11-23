@@ -28,13 +28,13 @@ __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic
+import numpy as np
 from URBasic import kinematic
 import time
-import numpy
 
-host = '172.31.1.115'   #E.g. a Universal Robot offline simulator, please adjust to match your IP
+host = '172.31.1.115'  # E.g. a Universal Robot offline simulator, please adjust to match your IP
 acc = 0.9
-vel = 0.2
+vel = 0.1
 
 
 def ExampleurScript():
@@ -48,20 +48,30 @@ def ExampleurScript():
     https://www.universal-robots.com/download/?option=26266#section16597
     '''
     robotModle = URBasic.robotModel.RobotModel()
-    robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle)
+    robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=robotModle)
     robot.reset_error()
 
-    rotasjon = numpy.array([[1, 0, 0, -0.6],
-                            [0, 1, 0, -0.7],
-                            [0, 0, 1, 0.400],
-                            [0, 0, 0, 1]])
+    def moveDirection(startPosition, movementVec):
+        rot = np.array([[0.7071, -0.7071, 0, 0],
+                        [0.7071, 0.7071, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]])
+        movementVec = np.matmul(rot, movementVec)
+        newPosition = startPosition[:, -1] + movementVec[:, -1] - np.array([0, 0, 0, 1])
+        newPosition = np.column_stack((startPosition[:, 0:3], newPosition))
+        robot.movej(pose=kinematic.Tran_Mat2Pose(startPosition), a=acc, v=vel)
+        robot.movej(pose=kinematic.Tran_Mat2Pose(newPosition), a=acc, v=vel)
+        robot.close()
 
-    # Units for pose is meters and radians: Pose = (X, Y, Z, rot, rot, rot)
-    #robot.movej(pose=kinematic.Tran_Mat2Pose(rotasjon), a=acc, v=vel)
-    robot.movej(pose=kinematic.Tran_Mat2Pose(rotasjon), a=acc, v=vel)
-
-
-    robot.close()
+    start_pos = np.array([[0, -0.7071, -0.7071, -0.3],
+                          [0, 0.7071, -0.7071, -0.8],
+                          [1, 0, 0, 0.600],
+                          [0, 0, 0, 1]])
+    vector = np.array([[1, 0, 0, 0.3],
+                       [0, 1, 0, 0.2],
+                       [0, 0, 1, 0.3],
+                       [0, 0, 0, 1]])
+    moveDirection(start_pos, vector)
 
 
 if __name__ == '__main__':
