@@ -77,6 +77,7 @@ def main():
 
             start = perf_counter()
             
+<<<<<<< Updated upstream
             
             res = detectHands(cap)
 
@@ -85,6 +86,74 @@ def main():
             if type(res) != None:
                 cv.imshow("res", res)
                 cv.waitKey(1)
+=======
+            res, fingertips = detectHands(cap)
+
+            end = perf_counter()
+            print(end-start)
+            cv.imshow("res",res)
+            cv.waitKey(1)
+
+# function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
+def detectHands(Input_img):
+    # Hand detection    
+    forHand = cv.cvtColor(Input_img, cv.COLOR_BGR2RGB)
+    results = hands.process(forHand)
+    #print(results.multi_hand_landmarks)
+
+    # Unpacking Input_img shape pro
+    h, w, c = Input_img.shape
+    fingertips = np.zeros((5,2))
+
+    Center = [int(h/2), int(w/2)]
+    
+    OuterBox = [int(np.rint(Center[0]*(1-OuterThresh))),int(np.rint(Center[1]*(1-OuterThresh))), int(np.rint(Center[0]*(1+OuterThresh))),int(np.rint(Center[1]*(1+OuterThresh)))]
+    InnerBox = [int(np.rint(Center[0]*(1-InnerThresh))),int(np.rint(Center[1]*(1-InnerThresh))), int(np.rint(Center[0]*(1+InnerThresh))),int(np.rint(Center[1]*(1+InnerThresh)))]
+
+    
+    col = 0
+    if results.multi_hand_landmarks:
+        handPos = []
+        for handLms in results.multi_hand_landmarks:
+            col += 2
+            for id, hand in enumerate(handLms.landmark):
+                #print(id,hand)
+                cx, cy = int(hand.x *w), int(hand.y*h)
+
+                if id in [0]:
+                    cv.circle(forHand, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                    handPos.append(cy)
+                    handPos.append(cx)
+            #mpDraw.draw_landmarks(forHand, handLms, mpHands.HAND_CONNECTIONS)
+        #print(handPos)
+        
+        if len(handPos) == 4:
+            meany = int((handPos[0] + handPos[2])/2)
+            meanx = int((handPos[1] + handPos[3])/2)
+            cv.circle(forHand, (meanx, meany), 4, (0, 255, 0), -1)
+            centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
+            print(centerDiff)
+
+
+        for i in range(5):
+            fingertips[i][0] = handLms.landmark[(i+1)*4].x * w
+            fingertips[i][1] = handLms.landmark[(i+1)*4].y * h
+
+        
+        
+        '''
+        if averaveX > 288 and averaveX < 352 and averageY > 216 and averageY < 264:
+            if averaveX > 304 and averaveX < 336 and averageY > 228 and averageY < 252:
+                print("blå")
+            else: 
+                print("rød")
+        else:
+            print(Center[0]-averageY, Center[1]-averaveX)
+        '''
+
+    return forHand , fingertips
+
+>>>>>>> Stashed changes
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img):
