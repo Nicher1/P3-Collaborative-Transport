@@ -141,7 +141,7 @@ def detectHands(Input_img):
 
             else:
                 if len(centerDiff) == 2:
-                    return forHand, centerDiff
+                    return forHand, centerDiff[0], centerDiff[1]
                 else:
                     print(centerDiff)
                     pass
