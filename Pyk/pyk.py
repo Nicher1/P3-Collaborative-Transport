@@ -77,12 +77,15 @@ def main():
 
             start = perf_counter()
             
-            res, fingertips, diff = detectHands(cap)
+            res, diff = detectHands(cap)
+
+            print(diff)
 
             end = perf_counter()
             print(end-start)
-            cv.imshow("res",res)
-            cv.waitKey(1)
+            if type(res) != None:
+                cv.imshow("res", res)
+                cv.waitKey(1)
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img):
@@ -122,28 +125,30 @@ def detectHands(Input_img):
             meanx = int((handPos[1] + handPos[3])/2)
             cv.circle(forHand, (meanx, meany), 4, (0, 255, 0), -1)
             centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
-            print(centerDiff)
 
+            if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
+                if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
+                    print("blå")
+                    centerDiff = False
+                    print("inner if", type(centerDiff), type(forHand))
+                    return forHand, centerDiff
 
-        for i in range(5):
-            fingertips[i][0] = handLms.landmark[(i+1)*4].x * w
-            fingertips[i][1] = handLms.landmark[(i+1)*4].y * h
+                else: 
+                    print("rød")
+                    centerDiff = False
+                    print("inner else", type(centerDiff), type(forHand))
+                    return forHand, centerDiff
 
-        
-        
-        
-        if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
-            if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                print("blå")
-                centerDiff = 0
-            else: 
-                print("rød")
-                centerDiff = 0
-        else:
-            print(centerDiff)
-            return forHand, fingertips, centerDiff
-            
-    return forHand, fingertips, centerDiff
+            else:
+                forHand = 1
+                print("outer else", type(centerDiff), centerDiff, type(forHand))
+                if len(centerDiff) == 2:
+                    return forHand, centerDiff
+                else:
+                    centerDiff = False
+                    print(type(forHand))
+                    return forHand, centerDiff
+                
 
 
 if __name__ == '__main__':
