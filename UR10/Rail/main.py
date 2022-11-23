@@ -23,7 +23,7 @@ shutdown_array = bytearray(shutdown)
 switchOn = [0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 64, 0, 0, 0, 0, 2, 7, 0]
 switchOn_array = bytearray(switchOn)
 
-enableOperation = [0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 64, 0, 0, 0, 0, 2, 15, 0]
+enableOperation = [0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 15, 0]
 enableOperation_array = bytearray(enableOperation)
 
 # Function for shutdown
@@ -93,7 +93,6 @@ def getReadyToMove():
     # sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 96, 131, 0, 0, 0, 0, 2, 184, 11]))
 
 def targetPosition(target, rw=1):
-    sendCommand(enableOperation_array)
 
     def extractBytes(integer):
         return divmod(integer, 0x100)[::-1]
@@ -102,40 +101,46 @@ def targetPosition(target, rw=1):
     if target > 0xffff:
         print("Invalid target specified")
     else:
-        if target > 0xff:
+        if target > 255:
             target2Byt = extractBytes(target)
-            targetPos = [0, 0, 0, 0, 0, 17, 0, 43, 15, rw, 0, 0, 96, 122, 0, 0, 0, 0, 4, 0, 0, target2Byt[0], target2Byt[1]]
-        elif target <= 0xff:
+            targetPos = [0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 4, target2Byt[0], target2Byt[1]]
+        elif target <= 255:
             targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 96, 122, 0, 0, 0, 0, 1, target]
 
+        print(f"targetPos: {targetPos}")
+        #targetPos = [0, 0, 0, 0, 0, 14, 0, 43, 13, rw, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 1, 250]
         targetPos_array = bytearray(targetPos)
+        print("Sending targetPos_array")
         sendCommand(targetPos_array)
+
         # set velocity and acceleration of profile
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x81, 0, 0, 0, 0, 2, 0xF4, 0x01]))
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x81, 0, 0, 0, 0, 2, 0x2c, 0x1]))
         # Profile acceleration set below
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x83, 0, 0, 0, 0, 2, 0xb8, 0x0b]))
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x83, 0, 0, 0, 0, 2, 0x2c, 0x1]))
         # Profile deacceleration set below
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x84, 0, 0, 0, 0, 2, 0xb8, 0x0b]))
-        # Position printed below
-        # sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4]))
-        
-        # set velocity target
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 2, 0xF4, 0x01]))
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x84, 0, 0, 0, 0, 2, 0x2c, 0x1]))
+
+        # # set velocity target
+        # sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 2, 0x2c, 0x1]))
         
         print("My location:")
-        myLoc = sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4]))
+        sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4]))
         print("targetpos:")
-        targetLoc = sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 4]))
-        
-        # while sendCommand(status_array) != 
-        
-        # Execute command
-        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
+        sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 4]))
 
-        time.sleep(1)
+        # Execute command
+        sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, rw, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 0x1f, 0x0]))
+
+        time.sleep(0.1)
+        print("targetpos after execute command:")
+        sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 4]))
+
         # Check Statusword for target reached
         while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 0x60, 0x41, 0, 0, 0, 0, 2, 39, 22]):
-            print("wait for next command")
+            print("Wait for next command")
+
+            print("targetpos in loop:")
+            sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 0x60, 0x7a, 0, 0, 0, 0, 4]))
             # 1 second delay
             time.sleep(1)
 
@@ -177,7 +182,7 @@ def homing():
     time.sleep(1)
     print("About to home")
     # Start Homing 6040h
-    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 31, 0]))
+    sendCommand(bytearray([0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x40, 0, 0, 0, 0, 2, 0x1f, 0]))
   
     while (sendCommand(status_array) != [0, 0, 0, 0, 0, 15, 0, 43, 13, 0, 0, 0, 0x60, 0x41, 0, 0, 0, 0, 2, 39, 22]):
         print("wait for Homing to end")
@@ -197,4 +202,5 @@ def homing():
 startProcedure()
 homing()
 getReadyToMove()
-targetPosition(256)
+targetPosition(1000)
+
