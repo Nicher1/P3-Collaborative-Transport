@@ -155,12 +155,12 @@ def homing():
 
     sendCommand(enableOperation_array)
 
-def init():
+def dryveInit():
     startProcedure()
     homing()
     set_mode(1)
 
-init()
+dryveInit()
 
 # Never input target position lower than 1. It will trigger the limit switch.
 
