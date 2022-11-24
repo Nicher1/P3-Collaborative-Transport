@@ -39,8 +39,8 @@ k4a = PyK4A(
         Config(
         color_resolution=pyk.ColorResolution.RES_720P,
         camera_fps=pyk.FPS.FPS_15,
-        depth_mode=pyk.DepthMode.NFOV_UNBINNED,
-        synchronized_images_only=True,
+        depth_mode=pyk.DepthMode.WFOV_UNBINNED,
+        synchronized_images_only=True
         )
     )
 
@@ -54,7 +54,6 @@ hands = mpHands.Hands(static_image_mode=False,
 mpDraw = mp.solutions.drawing_utils
 # Detect the joint of hands and return the position of finger tips
 # https://google.github.io/mediapipe/solutions/hands.html
-
 
 #####################################################################
 ###########################   FUNCTIONS   ########################### 
@@ -72,18 +71,20 @@ def main():
         k4aCapture = k4a.get_capture()
         if np.any(k4aCapture.color):
             tempCap = k4aCapture.color
-            
-            cap = cv.cvtColor(tempCap, cv.COLOR_BGRA2BGR)
+
+            capCol = cv.cvtColor(tempCap, cv.COLOR_BGRA2BGR)
+            capTransDepth = k4aCapture.transformed_depth
 
             start = perf_counter()
             
-            res, fingertips, stuff = detectHands(cap)
+            res, fingertips, stuff = detectHands(capCol, capTransDepth)
 
             res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
             end = perf_counter()
-            cv.imshow("res",res)
+           # cv.imshow("res",res)
+            cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
             cv.waitKey(1)
-
+        
             #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
             if np.any(stuff) != 0:
                 Center = stuff[0]
@@ -101,14 +102,17 @@ def main():
                     doStuff = True
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
-def detectHands(Input_img):
+def detectHands(Input_img_col, Input_img_depth):
     # Hand detection    
-    forHand = cv.cvtColor(Input_img, cv.COLOR_BGR2RGB)
-    results = hands.process(forHand)
+    imgCol = cv.cvtColor(Input_img_col, cv.COLOR_BGR2RGB)
+    imgDepth = Input_img_depth
+
+    results = hands.process(imgCol)
     #print(results.multi_hand_landmarks)
 
     # Unpacking Input_img shape pro
-    h, w, c = Input_img.shape
+    hdep, wdep = Input_img_depth.shape
+    h, w, c = Input_img_col.shape
     fingertips = np.zeros((5,2))
 
     Center = [int(h/2), int(w/2)]
@@ -116,24 +120,24 @@ def detectHands(Input_img):
     OuterBox = [int(np.rint(Center[0]*(1-OuterThresh))),int(np.rint(Center[1]*(1-OuterThresh))), int(np.rint(Center[0]*(1+OuterThresh))),int(np.rint(Center[1]*(1+OuterThresh)))]
     InnerBox = [int(np.rint(Center[0]*(1-InnerThresh))),int(np.rint(Center[1]*(1-InnerThresh))), int(np.rint(Center[0]*(1+InnerThresh))),int(np.rint(Center[1]*(1+InnerThresh)))]
 
-    
     col = 0
     if results.multi_hand_landmarks:
         handPos = []
+        print("-------------------------------")
         for handLms in results.multi_hand_landmarks:
-            col += 2
+            col += 1
             for id, hand in enumerate(handLms.landmark):
                 #print(id,hand)
                 cx, cy = int(hand.x *w), int(hand.y*h)
 
                 if id in [0]:
-                    cv.circle(forHand, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                    print("Dist wrist", col, ": ", imgDepth[cy, cx])
+                    cv.circle(imgDepth, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
                     handPos.append(cy)
                     handPos.append(cx)
-            #mpDraw.draw_landmarks(forHand, handLms, mpHands.HAND_CONNECTIONS)
+            #mpDraw.draw_landmarks(imgCol, handLms, mpHands.HAND_CONNECTIONS)
         #print(handPos)
         
-      
 
 
         for i in range(5):
@@ -143,12 +147,12 @@ def detectHands(Input_img):
         if len(handPos) == 4:
             meany = int((handPos[0] + handPos[2])/2)
             meanx = int((handPos[1] + handPos[3])/2)
-            cv.circle(forHand, (meanx, meany), 4, (0, 255, 0), -1)
+            cv.circle(imgDepth, (meanx, meany), 4, (0, 255, 0), -1)
             centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
 
             paperbin = [Center, centerDiff, meany, meanx]
             
-            return forHand, fingertips, paperbin
+            return imgCol, fingertips, paperbin
 
         
         '''
@@ -162,7 +166,7 @@ def detectHands(Input_img):
         '''
     paperbin = [0, 0, 0, 0]
 
-    return forHand, fingertips, paperbin
+    return imgCol, fingertips, paperbin
 
 if __name__ == '__main__':
     main()
