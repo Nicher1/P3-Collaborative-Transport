@@ -27,9 +27,9 @@ def ExampleurScript():
 
     ur10Pose = np.array([[0, -0.7071, -0.7071, 0],
                           [0, 0.7071, -0.7071, 0],
-                          [1, 0, 0, 0.600],
+                          [1, 0, 0, 0.300],
                           [0, 0, 0, 1]])
-    movementVector = np.array([1, 0, 1])
+    movementVector = np.array([0, 0, 0.4])
     moveDirection(ur10Pose, movementVector)
 
 

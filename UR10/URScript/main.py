@@ -34,7 +34,7 @@ import time
 
 host = '172.31.1.115'  # E.g. a Universal Robot offline simulator, please adjust to match your IP
 acc = 0.9
-vel = 0.2
+vel = 0.3
 
 
 def ExampleurScript():
@@ -74,13 +74,12 @@ def ExampleurScript():
         movementVec = np.matmul(rot, movementVec)
         newPosition = startPosition[:, -1] + np.append(movementVec, 0)
         newPosition = np.column_stack((startPosition[:, 0:3], newPosition))
-        robot.servoj(pose,t=0.008,lookahead_time=0.1, gain=100)
-        #robot.close()
+        robot.movep(pose=kinematic.Tran_Mat2Pose(newPosition),a=acc,v=vel)
+        robot.close()
         return newPosition
 
     def interpolation(pose,vector):
         while pose[2,3]<0.8:
-              print("dsev")
               pose = moveDirectionVec(pose, vector)
 
 
@@ -92,12 +91,10 @@ def ExampleurScript():
                          [0, 0.7071, -0.7071, - 0.3],
                          [1, 0, 0, 0.600],
                          [0, 0, 0, 1]])
-    movementVector = np.array([0, 0, 0.01])
+    movementVector = np.array([-0.3, 0, 0.4])
     movementVector1 = np.array([0, 0.6, 0])
     robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
-    q = robot.get_inverse_kin(pose)
-    print(q)
-    interpolation(ur10Pose,movementVector)
+    moveDirectionVec(ur10Pose,movementVector)
 
 if __name__ == '__main__':
     ExampleurScript()
