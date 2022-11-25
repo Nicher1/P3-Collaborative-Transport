@@ -158,7 +158,6 @@ def init():
 
 def set_mode(mode):
 
-    #Setzen der Operationsmodi im Objekt 6060h Modes of Operation
     #Set operation modes in object 6060h Modes of Operation
     sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 96, 96, 0, 0, 0, 0, 1, mode]))
     while (sendCommand(bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, 0, 0, 0, 96, 97, 0, 0, 0, 0, 1])) != [0, 0, 0, 0, 0, 14, 0, 43, 13, 0, 0, 0, 96, 97, 0, 0, 0, 0, 1, mode]):
