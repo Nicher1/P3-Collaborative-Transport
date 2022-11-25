@@ -55,51 +55,56 @@ mpDraw = mp.solutions.drawing_utils
 # Detect the joint of hands and return the position of finger tips
 # https://google.github.io/mediapipe/solutions/hands.html
 
+k4a.start()
+k4a.whitebalance = 4500
+assert k4a.whitebalance==4500
+k4a.whitebalance = 4510
+assert k4a.whitebalance == 4510
+
+
 #####################################################################
 ###########################   FUNCTIONS   ########################### 
 #####################################################################
 
-# primary function containing all main code
 def main():
-    k4a.start()
-    k4a.whitebalance = 4500
-    assert k4a.whitebalance==4500
-    k4a.whitebalance = 4510
-    assert k4a.whitebalance == 4510
-
     while True:
-        k4aCapture = k4a.get_capture()
-        if np.any(k4aCapture.color):
-            tempCap = k4aCapture.color
+        toDoOrNotToDo = cameraUI()
+        print(toDoOrNotToDo)
 
-            capCol = cv.cvtColor(tempCap, cv.COLOR_BGRA2BGR)
-            capTransDepth = k4aCapture.transformed_depth
+# primary function containing all main code
+def cameraUI():
+    k4aCapture = k4a.get_capture()
+    if np.any(k4aCapture.color):
+        capCol = cv.cvtColor(k4aCapture.color, cv.COLOR_BGRA2BGR)
+        capTransDepth = k4aCapture.transformed_depth
 
-            start = perf_counter()
-            
-            res, fingertips, stuff = detectHands(capCol, capTransDepth)
-
-            res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
-            end = perf_counter()
-           # cv.imshow("res",res)
-            cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
-            cv.waitKey(1)
+        start = perf_counter()
         
-            #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
-            if np.any(stuff) != 0:
-                Center = stuff[0]
-                centerDiff = stuff[1]
-                meany = stuff[2]
-                meanx = stuff[3]
+        res, fingertips, stuff = detectHands(capCol, capTransDepth)
 
-                if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
-                    if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                        doStuff = False
-                    else:
-                        doStuff = False
+        res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
+        end = perf_counter()
+        # cv.imshow("res",res)
+        cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
+        cv.waitKey(1)
+    
+        #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
+        if np.any(stuff) != 0:
+            Center = stuff[0]
+            centerDiff = stuff[1]
+            meany = stuff[2]
+            meanx = stuff[3]
 
+            if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
+                if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
+                    doStuff = False
                 else:
-                    doStuff = True
+                    doStuff = False
+
+            else:
+                doStuff = True
+
+            return doStuff
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
@@ -135,11 +140,7 @@ def detectHands(Input_img_col, Input_img_depth):
                     cv.circle(imgDepth, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
                     handPos.append(cy)
                     handPos.append(cx)
-            #mpDraw.draw_landmarks(imgCol, handLms, mpHands.HAND_CONNECTIONS)
-        #print(handPos)
         
-
-
         for i in range(5):
             fingertips[i][0] = handLms.landmark[(i+1)*4].x * w
             fingertips[i][1] = handLms.landmark[(i+1)*4].y * h
@@ -154,91 +155,10 @@ def detectHands(Input_img_col, Input_img_depth):
             
             return imgCol, fingertips, paperbin
 
-        
-        '''
-        if averaveX > 288 and averaveX < 352 and averageY > 216 and averageY < 264:
-            if averaveX > 304 and averaveX < 336 and averageY > 228 and averageY < 252:
-                print("blå")
-            else: 
-                print("rød")
-        else:
-            print(Center[0]-averageY, Center[1]-averaveX)
-        '''
     paperbin = [0, 0, 0, 0]
 
     return imgCol, fingertips, paperbin
 
+
 if __name__ == '__main__':
     main()
-
-
-######################################################################
-##########################   OLD SNIPPETS   ########################## 
-######################################################################
-
-'''
-with mp_pose.Pose(
-model_complexity=0,
-static_image_mode=True,
-enable_segmentation=True,
-min_detection_confidence=0.85) as pose:
-
-    result = pose.process(cap)
-
-    LandResults = []
-    Idx = []
-    try:
-        for id, lm in enumerate(result.pose_landmarks.landmark):
-            LandResults.append([])
-            x= int(lm.x*cap.shape[1])
-            y= int(lm.y*cap.shape[0])
-            LandResults[id].append(y)
-            LandResults[id].append(x)
-            Idx.append(id)
-
-        DrawSelect =[LandResults[15],LandResults[16]]
-
-
-
-        LandResults = []
-        Idx = []
-        for id, lm in enumerate(result.pose_landmarks.landmark):
-            LandResults.append([])
-            x= int(lm.x*cap.shape[1])
-            y= int(lm.y*cap.shape[0])
-            LandResults[id].append(y)
-            LandResults[id].append(x)
-            Idx.append(id)
-
-        Center = [cap.shape[0]/2, cap.shape[1]/2]
-        OuterBox = [int(np.rint(Center[0]*(1-OuterThresh))),int(np.rint(Center[1]*(1-OuterThresh))), int(np.rint(Center[0]*(1+OuterThresh))),int(np.rint(Center[1]*(1+OuterThresh)))]
-        InnerBox = [int(np.rint(Center[0]*(1-InnerThresh))),int(np.rint(Center[1]*(1-InnerThresh))), int(np.rint(Center[0]*(1+InnerThresh))),int(np.rint(Center[1]*(1+InnerThresh)))]
-
-
-        Center = [cap.shape[0]/2,cap.shape[1]/2]
-        averaveX = int(np.rint((LandResults[15][1]+LandResults[16][1])/2))
-        averageY = int(np.rint((LandResults[15][0]+LandResults[16][0])/2))
-
-        cv.rectangle(cap, (OuterBox[1],OuterBox[0]),(OuterBox[3],OuterBox[2]),(0,0,255),-1)
-        cv.rectangle(cap, (InnerBox[1],InnerBox[0]), (InnerBox[3],InnerBox[2]),(255,0,0),-1)
-        cv.circle(cap, (averaveX, averageY), 5, (0,255,0), -1)
-
-        if averaveX > 288 and averaveX < 352 and averageY > 216 and averageY < 264:
-            if averaveX > 304 and averaveX < 336 and averageY > 228 and averageY < 252:
-                print("blå")
-            else: 
-                print("rød")
-        else:
-            print(Center[0]-averageY, Center[1]-averaveX)
-        
-        for i in range(len(DrawSelect)):
-            cv.circle(cap, (DrawSelect[i][1], DrawSelect[i][0]), 5, (0, 255, 0), -1)
-        
-    except AttributeError:
-        continue
-    end = perf_counter()
-    print(end-start)
-    cv.imshow("Result", cap)
-    # cv.imshow("depth", colorize(k4aCapture.depth, (None, 5000), cv.COLORMAP_HSV))
-    cv.waitKey(1)
-'''
