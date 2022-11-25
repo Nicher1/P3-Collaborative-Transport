@@ -136,7 +136,8 @@ def cameraUI():
 
             else:
                 centerDiff = np.array([0,centerDiff[1]/100,centerDiff[0]/100])
-                ur10Pose = moveDirectionVec(ur10Pose,centerDiff)
+                print(centerDiff)
+                #ur10Pose = moveDirectionVec(ur10Pose,centerDiff)
 
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
