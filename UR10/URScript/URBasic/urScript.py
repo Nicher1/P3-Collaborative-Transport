@@ -847,7 +847,7 @@ end
         x:                   tool pose (spatial vector)
         qnear:               joint positions to select solution. 
                              Optional.
-        maxPositionError:    Define the max allowed position error. 
+        maxPositionError:    Define the max allowed position error.
                              Optional.
         maxOrientationError: Define the max allowed orientation error. 
                              Optional.

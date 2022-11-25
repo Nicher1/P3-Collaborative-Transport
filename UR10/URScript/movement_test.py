@@ -1,4 +1,5 @@
 import numpy as np
+import roboticstoolbox as rtb
 
 def ExampleurScript():
     '''
