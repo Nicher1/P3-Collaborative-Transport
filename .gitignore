@@ -2,5 +2,3 @@
 *.xml
 \.vscode\
 Pyk/__pycache__/helpers.cpython-38.pyc
-*.csv
-*.log
