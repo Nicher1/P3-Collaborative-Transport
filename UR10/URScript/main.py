@@ -78,9 +78,22 @@ def ExampleurScript():
         robot.close()
         return newPosition
 
-    def interpolation(pose,vector):
-        while pose[2,3]<0.8:
-              pose = moveDirectionVec(pose, vector)
+    def moveservoj(startPosition,movementVec):
+        '''
+        Function for moving the ur10 to a desired position via a 3 dimensional vector.
+        The function requires a start position,a vector, and a velocity and acceleration
+        '''
+        rot = np.array([[0.7071, -0.7071, 0],
+                        [0.7071, 0.7071, 0],
+                        [0, 0, 1]])
+        movementVec = np.matmul(rot, movementVec)
+        newPosition = startPosition[:, -1] + np.append(movementVec, 0)
+        newPosition = np.column_stack((startPosition[:, 0:3], newPosition))
+        newPose = Tran_Mat2Pose(newPosition)
+        inverseKinematics = Invkine_manip(newPose)
+
+        (inverseKinematics, 0, 0, 0.008, 0.1, 300)
+        return newPosition
 
 
     ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
@@ -94,7 +107,7 @@ def ExampleurScript():
     movementVector = np.array([-0.3, 0, 0.4])
     movementVector1 = np.array([0, 0.6, 0])
     robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
-    moveDirectionVec(ur10Pose,movementVector)
+    ur10Pose = moveservoj(ur10Pose,movementVector)
 
 if __name__ == '__main__':
     ExampleurScript()
