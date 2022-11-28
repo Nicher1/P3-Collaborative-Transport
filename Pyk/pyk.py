@@ -6,6 +6,7 @@ from time import perf_counter
 import mediapipe as mp
 from helpers import colorize
 import pyk4a as pyk
+import math
 
 #####################################################################
 ###########################     SETUP     ########################### 
@@ -15,6 +16,9 @@ import pyk4a as pyk
 InnerThresh = 0.05
 OuterThresh = 0.1
 col = (0, 255, 0)
+
+#Dlete this variable below
+iteration = 0
 
 # Definition of mediapipe tracking solutions and drawing styles
 mp_drawing = mp.solutions.drawing_utils
@@ -69,7 +73,7 @@ assert k4a.whitebalance == 4510
 def main():
     while True:
         toDoOrNotToDo = cameraUI()
-        print(toDoOrNotToDo)
+       # print(toDoOrNotToDo)
 
 # primary function containing all main code
 def cameraUI():
@@ -94,6 +98,14 @@ def cameraUI():
             centerDiff = stuff[1]
             meany = stuff[2]
             meanx = stuff[3]
+            length = stuff[4] 
+
+           # print(length)
+            global iteration
+            iteration = iteration + 1
+            if iteration%10 == 0:
+                val = pixelDist2EucDist(meanx, meany, length)
+                print(val)
 
             if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
                 if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
@@ -128,16 +140,15 @@ def detectHands(Input_img_col, Input_img_depth):
     col = 0
     if results.multi_hand_landmarks:
         handPos = []
-        print("-------------------------------")
+       # print("-------------------------------")
         for handLms in results.multi_hand_landmarks:
             col += 1
             for id, hand in enumerate(handLms.landmark):
-                #print(id,hand)
+               # print(id,hand)
                 cx, cy = int(hand.x *w), int(hand.y*h)
 
                 if id in [0]:
-                    print("Dist wrist", col, ": ", imgDepth[cy, cx])
-                    cv.circle(imgDepth, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                   # print("Dist wrist", col, ": ", imgDepth[cy, cx])
                     handPos.append(cy)
                     handPos.append(cx)
         
@@ -148,16 +159,33 @@ def detectHands(Input_img_col, Input_img_depth):
         if len(handPos) == 4:
             meany = int((handPos[0] + handPos[2])/2)
             meanx = int((handPos[1] + handPos[3])/2)
+            centerDiffLenght = int(imgDepth[handPos[0], handPos[1]] + imgDepth[handPos[2], handPos[3]])/2
             cv.circle(imgDepth, (meanx, meany), 4, (0, 255, 0), -1)
             centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
+            paperbin = [Center, centerDiff, meany, meanx, centerDiffLenght]
 
-            paperbin = [Center, centerDiff, meany, meanx]
-            
+        if len(handPos) == 2:
+            cv.circle(imgDepth, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+
+        if len(handPos) == 4:
+            cv.circle(imgDepth, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+            cv.circle(imgDepth, (handPos[3], handPos[2]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
             return imgCol, fingertips, paperbin
 
-    paperbin = [0, 0, 0, 0]
+    paperbin = [0, 0, 0, 0, 0]
 
     return imgCol, fingertips, paperbin
+
+def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi/2), FOVy=1.03, xwidth=1280, yheight=720):
+    # xp = x coordinate in pixels, yp = y coordinate in pixels. h = 3D distance to point.
+    # All angles are in radians
+    thetax = (FOVx/xwidth)*(xp-(xwidth/2))
+    thetay = (FOVy/yheight)*(yp-(yheight/2))
+    x = h*np.sin(thetax)
+    y = h*np.sin(thetay)
+    z = h*np.cos(thetax)
+    pos = [x, y, z]
+    return pos
 
 
 if __name__ == '__main__':
