@@ -466,6 +466,9 @@ def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]
     T_target = target_pos
     T_tcp = Pose2Tran_Mat(pose=tcpOffset)
     Mar = np.matmul(T_target, np.linalg.inv(T_tcp))
+    Mar = Tran_Mat2Pose(Mar)
+    print(Mar[0:3])
+
     #Inverse kinematics
     if len(init_joint_pos)<6 :            
         return None
@@ -474,7 +477,7 @@ def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]
     # add a [0] at the base frame
     joint_initadd = np.zeros([7])
     joint_initadd[1:] = joint_init[:]
-    ikin = my_chain.inverse_kinematics(Mar,initial_position=joint_initadd.copy())
+    ikin = my_chain.inverse_kinematics(target_position=Mar[0:3],initial_position=joint_initadd.copy())
 
     print('***************************************************************************')
     print('Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*target_pos))

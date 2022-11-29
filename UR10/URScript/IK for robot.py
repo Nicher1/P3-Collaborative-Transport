@@ -20,5 +20,5 @@ jointEnd = np.radians(jointEnd)
 print(jointEnd)
 
 poseEnd = Tran_Mat2Pose(matEnd)
-invKinematics = Inverse_kin(matEnd, jointStart)
+invKinematics = Inverse_kin(target_pos=matEnd,init_joint_pos=jointEnd)
 print(invKinematics)
