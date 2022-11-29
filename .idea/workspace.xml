@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-    </list>
+    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="Added PID controller" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -171,7 +169,16 @@
       <option name="presentableId" value="Default" />
       <updated>1668947198874</updated>
       <workItem from="1668947203567" duration="1574000" />
+      <workItem from="1669717066648" duration="281000" />
     </task>
+    <task id="LOCAL-00001" summary="Added PID controller">
+      <created>1669717209408</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1669717209408</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -187,5 +194,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added PID controller" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added PID controller" />
   </component>
 </project>
