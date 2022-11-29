@@ -3,11 +3,12 @@ import time
 import createdryverail as dryve
 import matplotlib as plt
 
+
 class PID:
     # https://electronics.stackexchange.com/questions/629032/pid-controller-implementation-in-python
 
-    def __init__(self, Kp: float, Ki: float, Kd: float) -> None: # , tau: float
-            # Defines the datatype for each variable and gives them a starting value of none
+    def __init__(self, Kp: float, Ki: float, Kd: float) -> None:  # , tau: float
+        # Defines the datatype for each variable and gives them a starting value of none
 
         # Creates the weight variables
         self.Kp = Kp
@@ -15,7 +16,7 @@ class PID:
         self.Kd = Kd
 
         # Time constraint?
-        #self.tau = tau
+        # self.tau = tau
 
         # Sets the initial value of P, I and D to zero
         self.Dterm = 0
@@ -58,13 +59,13 @@ class PID:
         # Calculates P, I and D
         self.Pterm = self.Kp * error
         self.Iterm += (error + self.last_error) * 0.5 * self.Ki * delta_time
-            # Calculates the integral in diskret time
+        # Calculates the integral in diskret time
 
         # Maybe use error instead of feedback? Since the error might change over time
-        self.Dterm = self.Kd*(error - self.last_error)/(current_time - self.last_time)
+        self.Dterm = self.Kd * (error - self.last_error) / (current_time - self.last_time)
 
-        #self.Dterm = (-2 * self.Kd * (feedback - self.last_feedback) + (2 * self.tau - delta_time) * self.Dterm / (2 * self.tau + delta_time))
-            # ???
+        # self.Dterm = (-2 * self.Kd * (feedback - self.last_feedback) + (2 * self.tau - delta_time) * self.Dterm / (2 * self.tau + delta_time))
+        # ???
 
         # Thresholds the integration
         if self.Iterm > self.max_int:
@@ -76,7 +77,7 @@ class PID:
         self.last_time = current_time
         self.last_error = error
         self.last_feedback = feedback
-            # feedback = VP
+        # feedback = VP
 
         # Prints the calculated P, I and VP
         print(f"P: {self.Pterm}, I: {self.Iterm}, f: {feedback}")
@@ -97,6 +98,7 @@ class PID:
         # Returns the output
         return output
 
+
 class interpritor:
 
     def __init__(self, max_speed: float, error: float, Kp: float, Ki: float, Kd: float) -> None:
@@ -113,29 +115,42 @@ class interpritor:
         self.PID_weight = P + I + D
 
     def interpriate(self, PID_result: float) -> None:
-        velocity = self.max_speed * (PID_result/self.PID_weight)
+        velocity = self.max_speed * (PID_result / self.PID_weight)
         return velocity
 
+
+def plotter(PID, time):
+    x = [0, 5, 10, 15]
+    y = [200, 200, 200, 200]
+
+    plt.plot(x, y, label="SP")
+    plt.plot(time, PID, label="VP")
+
+    plt.legend()
+    plt.show()
 
 
 # Main
 run = True
-constants_y = [1,0,0]
-SP = [0,201,0]
+constants_y = [1, 0, 0]
+SP = [0, 201, 0]
 dryve.dryveInit()
 dryve.targetPosition(1)
+PID_holder = deque()
+time_holder = deque()
 
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2])
-interpritor_y = interpritor(max_speed = 1, error= 200, Kp = constants_y[0], Ki= constants_y[1], Kd= constants_y[2])
+interpritor_y = interpritor(max_speed=1, error=200, Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2])
 
 while run == True:
     if xyz_vector[1] > 0:
         VP = dryve.getPosition()
         print(VP)
         PID_result = PIDy.update(feedback=VP, target=SP[1])
+        PID_holder.append(PID_result)
+        time_holder.append(time.time())
         velocity = interpriate(PID_result=PID_result)
         dryve.targetVelocity(velocity)
-
-
-
-
+        if VP == SP[2]:
+            run = False
+plotter(PID=PID_holder, time=time_holder)
