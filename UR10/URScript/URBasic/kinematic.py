@@ -87,8 +87,8 @@ def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob='ur10',tcpOffset=
 
     
     #error = (pi+ik-init_joint_pos)%(2*pi)-pi
-    
-    
+
+
     print('***************************************************************************')
     print('Pose  : [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*target_pos))
     print('Init q: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*init_joint_pos))
@@ -100,7 +100,7 @@ def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob='ur10',tcpOffset=
     print('Joints Candidate: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*ik))
     print('Joints Returned: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*out))   #init_joint_pos+error))
     print('***************************************************************************')
-    
+
     return out
     #return init_joint_pos+error
     
@@ -474,9 +474,8 @@ def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]
     # add a [0] at the base frame
     joint_initadd = np.zeros([7])
     joint_initadd[1:] = joint_init[:]
-    print(joint_initadd.copy())
-    ikin = my_chain.inverse_kinematics(target=Mar,initial_position=joint_initadd.copy())
-    
+    ikin = my_chain.inverse_kinematics(Mar,initial_position=joint_initadd.copy())
+
     print('***************************************************************************')
     print('Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*target_pos))
     print('---------------------------------------------------------------------------')
