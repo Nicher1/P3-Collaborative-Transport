@@ -72,8 +72,8 @@ assert k4a.whitebalance == 4510
 
 def main():
     while True:
-        toDoOrNotToDo = cameraUI()
-       # print(toDoOrNotToDo)
+        movement = cameraUI()
+        # UDP return here <--------
 
 # primary function containing all main code
 def cameraUI():
@@ -104,19 +104,19 @@ def cameraUI():
             global iteration
             iteration = iteration + 1
             if iteration%10 == 0:
-                val = pixelDist2EucDist(meanx, meany, length)
-                print(val)
+                vect = pixelDist2EucDist(meanx, meany, length)
+                print(vect)
 
             if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
                 if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                    doStuff = False
+                    outputVect = [vect, False]
                 else:
-                    doStuff = False
+                    outputVect = [vect, False]
 
             else:
-                doStuff = True
+                outputVect = [vect, True]
 
-            return doStuff
+            return outputVect
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
