@@ -6,7 +6,6 @@ from time import perf_counter
 import mediapipe as mp
 from helpers import colorize
 import pyk4a as pyk
-import math
 
 #####################################################################
 ###########################     SETUP     ########################### 
