@@ -17,9 +17,6 @@ InnerThresh = 0.05
 OuterThresh = 0.1
 col = (0, 255, 0)
 
-#Dlete this variable below
-iteration = 0
-
 # Definition of mediapipe tracking solutions and drawing styles
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
