@@ -16,6 +16,11 @@ InnerThresh = 0.05
 OuterThresh = 0.1
 col = (0, 255, 0)
 
+
+#Dlete this variable below
+iteration = 0
+
+
 # Definition of mediapipe tracking solutions and drawing styles
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -105,12 +110,12 @@ def cameraUI():
 
             if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
                 if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                    outputVect = [vect, False]
+                    outputVect = False
                 else:
-                    outputVect = [vect, False]
+                    outputVect = False
 
             else:
-                outputVect = [vect, True]
+                outputVect = True
 
             return outputVect
 
