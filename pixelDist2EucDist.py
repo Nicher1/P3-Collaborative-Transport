@@ -6,7 +6,7 @@ def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi/2), FOVy=1.03, xwidth=1280, yheight
     thetax = (FOVx/xwidth)*(xp-(xwidth/2))
     thetay = (FOVy/yheight)*(yp-(yheight/2))
 
-    x = h* np.sin(thetax)
+    x = h*np.sin(thetax)
     y = h*np.sin(thetay)
     z = h*np.cos(thetax)
 
