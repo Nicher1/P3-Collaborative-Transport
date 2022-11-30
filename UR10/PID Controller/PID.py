@@ -1,11 +1,11 @@
 from cmath import inf
 import time
 import createdryverail as dryve
-import matplotlib as plt
+import matplotlib.pyplot as plt
+from collections import deque
 
 
 class PID:
-    # https://electronics.stackexchange.com/questions/629032/pid-controller-implementation-in-python
 
     def __init__(self, Kp: float, Ki: float, Kd: float) -> None:  # , tau: float
         # Defines the datatype for each variable and gives them a starting value of none
@@ -26,13 +26,14 @@ class PID:
         # Saved the current time as the start parameter
         self.last_time = time.time()
 
+
         # Is it necessary? It is never used
         self.last_feedback = 0
 
         self.last_output = 0
 
         # Sets the thresholding
-        self.set_limits(0, inf, -inf, inf)
+        self.set_limits(0, 300, -inf, inf)
 
     def set_limits(self, min: float, max: float, min_int: float, max_int: float) -> None:
 
@@ -51,14 +52,9 @@ class PID:
         # Sets the current time
         current_time = time.time()
 
-        # Uhhhh (maybe change delta_time depending on how long our code is?) (Perhaps calculate delta time using last_time and current_time)
-        delta_time = 0.001
-        if delta_time == 0:
-            return self.last_output
-
         # Calculates P, I and D
         self.Pterm = self.Kp * error
-        self.Iterm += (error + self.last_error) * 0.5 * self.Ki * delta_time
+        self.Iterm += (error + self.last_error) * 0.5 * self.Ki * (current_time - self.last_time)
         # Calculates the integral in diskret time
 
         # Maybe use error instead of feedback? Since the error might change over time
@@ -80,7 +76,7 @@ class PID:
         # feedback = VP
 
         # Prints the calculated P, I and VP
-        print(f"P: {self.Pterm}, I: {self.Iterm}, f: {feedback}")
+        #print(f"P: {self.Pterm}, I: {self.Iterm}, f: {feedback}")
 
         # Does the PID equation (MV)
         output = self.Pterm + self.Iterm + self.Dterm
@@ -98,29 +94,15 @@ class PID:
         # Returns the output
         return output
 
+    def interpriate(self, max_speed: float, previous_PID: float, current_PID: float):
+        velocity = current_PID
+        print(velocity)
 
-class interpritor:
-
-    def __init__(self, max_speed: float, error: float, Kp: float, Ki: float, Kd: float) -> None:
-        self.max_speed = max_speed
-        self.error = error
-        self.Kp = Kp
-        self.Ki = Ki
-        self.Kd = Kd
-
-        P = self.Kp * self.error
-        I = (self.error + 0) * 0.5 * self.Ki * 0.001
-        D = self.Kd * (self.error - 0) / (0.001)
-
-        self.PID_weight = P + I + D
-
-    def interpriate(self, PID_result: float) -> None:
-        velocity = self.max_speed * (PID_result / self.PID_weight)
         return velocity
 
 
 def plotter(PID, time):
-    x = [0, 5, 10, 15]
+    x = [0, 0.25, 0.75, 1]
     y = [200, 200, 200, 200]
 
     plt.plot(x, y, label="SP")
@@ -132,25 +114,32 @@ def plotter(PID, time):
 
 # Main
 run = True
-constants_y = [1, 0, 0]
+constants_y = [1, 0.01, 0.1]
 SP = [0, 201, 0]
 dryve.dryveInit()
-dryve.targetPosition(1)
 PID_holder = deque()
 time_holder = deque()
-
+starting_time = time.time()
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2])
-interpritor_y = interpritor(max_speed=1, error=200, Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2])
+
 
 while run == True:
-    if xyz_vector[1] > 0:
+    if SP[1] > 0:
         VP = dryve.getPosition()
-        print(VP)
         PID_result = PIDy.update(feedback=VP, target=SP[1])
-        PID_holder.append(PID_result)
-        time_holder.append(time.time())
-        velocity = interpriate(PID_result=PID_result)
+        #time.sleep(0.0000000001)
+        velocity = PIDy.interpriate(max_speed=300, current_PID=PID_result, previous_PID = previous_PID)
+        PID_holder.append(VP)
+        time_holder.append(time.time()-starting_time)
+        starting_time = time.time()
+        velocity = int(round(velocity))
         dryve.targetVelocity(velocity)
-        if VP == SP[2]:
+
+        if velocity < 1:
             run = False
-plotter(PID=PID_holder, time=time_holder)
+            dryve.targetVelocity(0)
+
+#plotter(PID=PID_holder, time=time_holder)
+time.sleep(1)
+ny_VP = dryve.getPosition()
+print(VP, " and ", ny_VP)
