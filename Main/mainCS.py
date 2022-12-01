@@ -43,7 +43,7 @@ def communicateUDP(sub_system, object, subindex=0, rw=0, information=0, nr_of_fo
     # Send data
     sub_system.s.sendto(package_array, (localAddress, sub_system.SERVER_PORT))
 
-    # Recieve data
+    # Receive data
     if rw == 0:
         recieved = sub_system.s.recvfrom(buffersize)
         recieved = list(recieved[0])

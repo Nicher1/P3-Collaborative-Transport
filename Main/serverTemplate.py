@@ -20,6 +20,7 @@ testUR10 = testClass
 
 # -------------------------------------------------
 
+# Extracts bytes from an integer and gives them as an array representing 32 bits, with bit 0 to the far right.
 def extractBytes(integer):
     firstArray = divmod(integer, 0x100)
     secondArray = divmod(firstArray[0], 0x100)
@@ -27,12 +28,14 @@ def extractBytes(integer):
     output = [thirdArray[0], thirdArray[1], secondArray[1], firstArray[1]]
     return output
 
+# Function which combines entries from a byte array into a single integer.
 def combineBytes(sign, bytes):
     output = bytes[0]*256**3 + bytes[1]*256**2 + bytes[2]*256 + bytes[3]
     if sign == 1:
         output = output*(-1)
     return output
 
+# Function which formats data and sends it back to the client.
 def respondUDP(object, subindex, readData):
     # Format data
     sign = 0
@@ -45,28 +48,10 @@ def respondUDP(object, subindex, readData):
     
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
-def recieveAndUnpack():
-    data = server.recvfrom(buffersize)
-    data = list(data[0])
-    object = data[0]
-    subindex = data[1]
-    rw = data[2]
-    sign = data[3]
-    information = combineBytes(sign, data[4:8])
-    followingMessages = data[8]
-    
-    readData = 0
-    readData = interpretUDPCommand(object, subindex, rw, information)
-    if rw == 0:
-        respondUDP(object, subindex, readData)
-        
-    if followingMessages > 0:
-        recieveAndUnpack()
-        print("Calling New recieveAndUnpack")
-
+# Function which links the information to the correct object and subindex.
 def interpretUDPCommand(object, subindex, rw, information):
     
-    if rw == 0:
+    if rw == 0: # Determine if the information should be read or written to the object.
         readData = 0
         if object == 1:
             if subindex == 1:
@@ -88,7 +73,24 @@ def interpretUDPCommand(object, subindex, rw, information):
     else:
         print("Error - Invalid read/write command")
 
+# Main function of the server side UDP. Receives the data, unpacks it, and launches the correct corresponding functions.
+def recieveAndUnpack():
+    data = server.recvfrom(buffersize)
+    data = list(data[0])
+    object = data[0]
+    subindex = data[1]
+    rw = data[2]
+    sign = data[3]
+    information = combineBytes(sign, data[4:8])
+    followingMessages = data[8]
+
+    readData = interpretUDPCommand(object, subindex, rw, information)
+    if rw == 0:
+        respondUDP(object, subindex, readData)
+
+    if followingMessages > 0:
+        recieveAndUnpack()
+
 while True:
     recieveAndUnpack()
-    time.sleep(4)
     print(testUR10.position)
