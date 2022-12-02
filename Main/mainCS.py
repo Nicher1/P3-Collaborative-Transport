@@ -49,16 +49,3 @@ def communicateUDP(sub_system, object, subindex=0, rw=0, information=0, nr_of_fo
         recieved = list(recieved[0])
         recieved = combineBytes(recieved[3], recieved[4:8])
         return recieved
-
-communicateUDP(ur10, 1, 1, rw=1, information=100500, nr_of_following_messages=2)
-communicateUDP(ur10, 1, 2, rw=1, information=100400, nr_of_following_messages=1)
-communicateUDP(ur10, 1, 3, rw=1, information=100300, nr_of_following_messages=0)
-
-print(communicateUDP(ur10, 1, 1))
-print(communicateUDP(ur10, 1, 2))
-print(communicateUDP(ur10, 1, 3))
-
-communicateUDP(ur10, 1, 3, rw=1, information=1500)
-
-print(communicateUDP(ur10, 1, 3))
-
