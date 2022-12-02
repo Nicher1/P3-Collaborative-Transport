@@ -181,38 +181,16 @@ def homing():
     sendCommand(enableOperationArray)
 
 
-# Definition of the function to send velocity data and convert decimal to 1/2-byte.
+# Definition of the function to send velocity data and convert decimal to 4-byte array (little endian).
 def targetVelocity(target):
     setMode(3)
-
-    # def extractBytes(integer):
-    #     return (integer).to_bytes(4, byteorder='big', signed=True)
-
-        # global bytes
-        # bytes = divmod(integer, 0x100)[::-1]
-        # if bytes[-1] < 0:
-        #     bytes = list(bytes)
-        #     bytes[-1] = bytes[-1] * -1
-        #     bytes = bytes + [0, 15]
-        #     return tuple(bytes)
-        # else:
-        #     bytes = list(bytes)
-        #     bytes = bytes + [0, 0]
-        #     return tuple(bytes)
-
-
 
     if target > 0xffff:
         print("Invalid target velocity specified")
     else:
         targetVel2Byt = (target).to_bytes(4, byteorder='little', signed=True)
-        print(targetVel2Byt)
-            #extractBytes(target)
-        #print(targetVel2Byt)
-
         # set velocity of profile
         sendCommand(bytearray([0, 0, 0, 0, 0, 17, 0, 43, 13, write, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 4]) + targetVel2Byt)
-        #print(bytearray([0, 0, 0, 0, 0, 17, 0, 43, 13, write, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 4]) + targetVel2Byt)
 
 def profileVelocity(target):
     def extractBytes(integer):
