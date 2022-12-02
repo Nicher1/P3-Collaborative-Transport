@@ -50,7 +50,6 @@ def setShdn():
         # 1 second delay
         time.sleep(1)
 
-
 # Function for switching on
 def setSwon():
     sendCommand(switchOnArray)
@@ -62,7 +61,6 @@ def setSwon():
         # 1 Sekunde Verzoegerung
         # 1 second delay
         time.sleep(1)
-
 
 # Function for enabling operation
 def setOpEn():
@@ -76,7 +74,6 @@ def setOpEn():
         # 1 second delay
         time.sleep(1)
 
-
 def setMode(mode):
     # Set operation modes in object 6060h Modes of Operation
     sendCommand(bytearray([0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 96, 96, 0, 0, 0, 0, 1, mode]))
@@ -86,7 +83,6 @@ def setMode(mode):
                                                                                                       0, 0, 1, mode]):
         # 1 second delay
         time.sleep(1)
-
 
 def startProcedure():
     reset = [0, 0, 0, 0, 0, 15, 0, 43, 13, write, 0, 0, 96, 64, 0, 0, 0, 0, 2, 0, 1]
@@ -109,7 +105,6 @@ def startProcedure():
     sendCommand(bytearray(
         [0, 0, 0, 0, 0, 15, 0, 43, 13, 1, 0, 0, 0x60, 0x84, 0, 0, 0, 0, 2, extractBytes(profileDeceleration)[0],
          extractBytes(profileDeceleration)[1]]))
-
 
 def targetPosition(target, rw=1):
     setMode(1)
@@ -139,7 +134,6 @@ def targetPosition(target, rw=1):
 
         sendCommand(enableOperationArray)
 
-
 # Definition of the function to send and receive data
 def sendCommand(data):
     # Create socket and send request
@@ -149,7 +143,6 @@ def sendCommand(data):
     # print(list(res))
     return list(res)
 
-
 def getPosition():
     getPositionFromDryve = bytearray([0, 0, 0, 0, 0, 13, 0, 43, 13, read, 0, 0, 0x60, 0x64, 0, 0, 0, 0, 4])
     positionRaw = sendCommand(getPositionFromDryve)
@@ -157,7 +150,6 @@ def getPosition():
     for i in range(4):
         position = position + positionRaw[i + 19] * 256 ** i
     return position
-
 
 def homing():
     setMode(6)
@@ -188,7 +180,6 @@ def homing():
 
     sendCommand(enableOperationArray)
 
-
 # Definition of the function to send velocity data and convert decimal to 1/2-byte.
 def targetVelocity(target):
     setMode(3)
@@ -197,12 +188,9 @@ def targetVelocity(target):
         print("Invalid target velocity specified")
     else:
         targetVel2Byt = (target).to_bytes(4, byteorder='little', signed=True)
-        print(targetVel2Byt)
-
         # set velocity of profile
         sendCommand(bytearray([0, 0, 0, 0, 0, 17, 0, 43, 13, write, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 4]) + targetVel2Byt)
         # print(bytearray([0, 0, 0, 0, 0, 17, 0, 43, 13, write, 0, 0, 0x60, 0xFF, 0, 0, 0, 0, 4]) + targetVel2Byt)
-
 
 def profileVelocity(target):
     def extractBytes(integer):
@@ -221,11 +209,9 @@ def profileVelocity(target):
             sendCommand(bytearray(
                 [0, 0, 0, 0, 0, 14, 0, 43, 13, 1, 0, 0, 0x60, 0x81, 0, 0, 0, 0, 1, target]))
 
-
 def dryveInit():
     establishConnection()
     startProcedure()
     homing()
     setMode(1)
-
 # Never input target position lower than 1. It will trigger the limit switch.
