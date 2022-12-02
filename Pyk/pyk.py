@@ -11,24 +11,25 @@ import pyk4a as pyk
 ###########################    CLASSES    ########################### 
 #####################################################################
 
-class position:
-    def __init__(self, x, y, z, react):
-        self.x = None
-        self.y = None
-        self.z = None
-        self.react = None
+class camera:
+    position = [0, 0, 0]
+
+class currentState:
+    state = False
 
 #####################################################################
 ###########################    SETTINGS    ########################## 
 #####################################################################
 
+# Print settings
 printXYZ = False
 printWristDist = False
-showImageRGB = False
 
+# Depth image settings
 drawCirclesDEPTH = True
 showImageDEPTH = True
 
+# RGB image settings
 drawCirclesRGB = False
 showImageRGB = False
 
@@ -37,7 +38,8 @@ showImageRGB = False
 #####################################################################
 
 # Class instances
-pos = position
+pos = camera()
+state = currentState()
 
 # Setup constants for use in main(), which needs to be defined only once
 InnerThresh = 0.05
@@ -113,7 +115,7 @@ def cameraUI():
 
         start = perf_counter()
         
-        res, stuff = detectHands(capCol, capTransDepth)
+        res, unpackPackage = detectHands(capCol, capTransDepth)
 
         res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
         end = perf_counter()
@@ -127,13 +129,12 @@ def cameraUI():
             cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
             cv.waitKey(1)
     
-        #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
-        if np.any(stuff) != 0:
-            Center = stuff[0]
-            centerDiff = stuff[1]
-            meany = stuff[2]
-            meanx = stuff[3]
-            length = stuff[4] 
+        if np.any(unpackPackage) != 0:
+            Center = unpackPackage[0]
+            centerDiff = unpackPackage[1]
+            meany = unpackPackage[2]
+            meanx = unpackPackage[3]
+            length = unpackPackage[4] 
 
            # print(length)
             if printXYZ == True:
@@ -145,14 +146,16 @@ def cameraUI():
             else:
                 vect = pixelDist2EucDist(meanx, meany, length)
 
+            pos.position = [vect[0], vect[1], vect[2]]
+
             if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
                 if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                    pos.react = False
+                    state.state = 0
                 else:
-                    pos.react = False
+                    state.state = 0
 
             else:
-                pos.react = True
+                state.state = 1
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
