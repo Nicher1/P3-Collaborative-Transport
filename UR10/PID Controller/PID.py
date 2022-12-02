@@ -92,15 +92,15 @@ class PID:
 
 # Main Setup (Can be removed)
 run = True
-SP = [100, 0, 0]
+SP = [0, 10, 0]
 starting_time = time.time()
 
 # Main Setup (This needs to remain in main)
-# dryve.dryveInit()   # (Commented out since I am testing the UR10)
-constants_y = [1, 0.01, 0.1]
+dryve.dryveInit()   # (Commented out since I am testing the UR10)
+constants_y = [1,0.002,0.01]
 constants_xz = [1, 1, 1]
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)
-PIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=300, lim_min=0)
+PIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100, lim_min=0) # A position of max 100 mm will give a velocity of 125 mm/s
 
 while run == True:
     if SP[1] > 0:
@@ -122,6 +122,6 @@ while run == True:
 # Not important just used for troubleshooting
 
 # plotter(PID=PID_holder, time=time_holder)
-# time.sleep(1)
-# ny_VP = dryve.getPosition()
-# print(VP, " and ", ny_VP)
+time.sleep(1)
+ny_VP = dryve.getPosition()
+print(VP, " and ", ny_VP)
