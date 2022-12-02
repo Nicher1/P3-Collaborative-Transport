@@ -6,33 +6,50 @@ from time import perf_counter
 import mediapipe as mp
 from helpers import colorize
 import pyk4a as pyk
-import URBasic
-from URBasic import kinematic
-import time
 
+#####################################################################
+###########################    CLASSES    ########################### 
+#####################################################################
+
+class camera:
+    position = [0, 0, 0]
+
+class currentState:
+    state = False
+
+#####################################################################
+###########################    SETTINGS    ########################## 
+#####################################################################
+
+# Print settings
+printXYZ = False
+printWristDist = False
+
+# Depth image settings
+drawCirclesDEPTH = True
+showImageDEPTH = True
+
+# RGB image settings
+drawCirclesRGB = False
+showImageRGB = False
 
 #####################################################################
 ###########################     SETUP     ########################### 
 #####################################################################
 
-#ur10 settings
-host = '172.31.1.115'  # E.g. a Universal Robot offline simulator, please adjust to match your IP
-acc = 0.9
-vel = 0.2
-ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
-                         [0, 0.7071, -0.7071, - 0.3],
-                         [1, 0, 0, 0.300],
-                         [0, 0, 0, 1]])
-
-robotModle = URBasic.robotModel.RobotModel()
-robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=robotModle)
-robot.reset_error()
-robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
+# Class instances
+pos = camera()
+state = currentState()
 
 # Setup constants for use in main(), which needs to be defined only once
 InnerThresh = 0.05
-OuterThresh = 0.075
+OuterThresh = 0.1
 col = (0, 255, 0)
+
+
+#Dlete this variable below
+iteration = 0
+
 
 # Definition of mediapipe tracking solutions and drawing styles
 mp_drawing = mp.solutions.drawing_utils
@@ -84,29 +101,13 @@ assert k4a.whitebalance == 4510
 ###########################   FUNCTIONS   ########################### 
 #####################################################################
 
-def main(initPose):
+def main():
     while True:
-        toDoOrNotToDo = cameraUI(initPose)
-        #print(toDoOrNotToDo)
-
-def moveDirectionVec(startPosition, movementVec):
-        '''
-        Function for moving the ur10 to a desired position via a 3 dimensional vector in meters.
-        The function requires a start position,a vector, and a velocity and acceleration
-        '''
-        rot = np.array([[0.7071, -0.7071, 0],
-                        [0.7071, 0.7071, 0],
-                        [0, 0, 1]])
-        movementVec = np.matmul(rot, movementVec)
-        newPosition = startPosition[:, -1] + np.append(movementVec, 0)
-        newPosition = np.column_stack((startPosition[:, 0:3], newPosition))
-        robot.movep(pose=kinematic.Tran_Mat2Pose(newPosition),a=acc,v=vel)
-        #robot.close()
-        return newPosition
+        movement = cameraUI()
+        # UDP return here <--------
 
 # primary function containing all main code
-def cameraUI(initPose):
-    ur10Pose = initPose
+def cameraUI():
     k4aCapture = k4a.get_capture()
     if np.any(k4aCapture.color):
         capCol = cv.cvtColor(k4aCapture.color, cv.COLOR_BGRA2BGR)
@@ -114,32 +115,47 @@ def cameraUI(initPose):
 
         start = perf_counter()
         
-        res, fingertips, stuff = detectHands(capCol, capTransDepth)
+        res, unpackPackage = detectHands(capCol, capTransDepth)
 
         res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
         end = perf_counter()
         # cv.imshow("res",res)
-        cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
-        cv.waitKey(1)
+        
+        if showImageRGB == True:
+            cv.imshow('RGB', capCol)
+            cv.waitKey(1)
+
+        if showImageDEPTH == True:
+            cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
+            cv.waitKey(1)
     
-        #if stuff[0] != 0 and stuff[1] != 0 and stuff[2] != 0 and stuff[3] != 0:
-        if np.any(stuff) != 0:
-            Center = stuff[0]
-            centerDiff = stuff[1]
-            meany = stuff[2]
-            meanx = stuff[3]
+        if np.any(unpackPackage) != 0:
+            Center = unpackPackage[0]
+            centerDiff = unpackPackage[1]
+            meany = unpackPackage[2]
+            meanx = unpackPackage[3]
+            length = unpackPackage[4] 
+
+           # print(length)
+            if printXYZ == True:
+                global iteration
+                iteration = iteration + 1
+                if iteration%10 == 0:
+                    vect = pixelDist2EucDist(meanx, meany, length)
+                    print(vect)
+            else:
+                vect = pixelDist2EucDist(meanx, meany, length)
+
+            pos.position = [vect[0], vect[1], vect[2]]
 
             if meanx > Center[1]+(1-OuterThresh) and meanx < Center[1]+(1+OuterThresh) and meany > Center[0]-(1+OuterThresh) and meany < Center[0]+(1+OuterThresh):
                 if meanx > Center[1]+(1-InnerThresh) and meanx < Center[1]+(1+InnerThresh) and meany > Center[0]-(1+InnerThresh) and meany < Center[0]+(1+InnerThresh):
-                    doStuff = False
+                    state.state = 0
                 else:
-                    doStuff = False
+                    state.state = 0
 
             else:
-                centerDiff = np.array([0,centerDiff[1]/100,centerDiff[0]/100])
-                print(centerDiff)
-                ur10Pose = moveDirectionVec(ur10Pose,centerDiff)
-
+                state.state = 1
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
@@ -163,16 +179,17 @@ def detectHands(Input_img_col, Input_img_depth):
     col = 0
     if results.multi_hand_landmarks:
         handPos = []
-        #print("-------------------------------")
+        if printWristDist == True:
+            print("-------------------------------")
         for handLms in results.multi_hand_landmarks:
             col += 1
             for id, hand in enumerate(handLms.landmark):
-                #print(id,hand)
+               # print(id,hand)
                 cx, cy = int(hand.x *w), int(hand.y*h)
 
                 if id in [0]:
-                    print("Dist wrist", col, ": ", imgDepth[cy, cx])
-                    cv.circle(imgDepth, (cx,cy), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                    if printWristDist == True:
+                        print("Dist wrist", col, ": ", imgDepth[cy, cx])
                     handPos.append(cy)
                     handPos.append(cx)
         
@@ -183,17 +200,44 @@ def detectHands(Input_img_col, Input_img_depth):
         if len(handPos) == 4:
             meany = int((handPos[0] + handPos[2])/2)
             meanx = int((handPos[1] + handPos[3])/2)
-            cv.circle(imgDepth, (meanx, meany), 4, (0, 255, 0), -1)
+            centerDiffLenght = int(imgDepth[handPos[0], handPos[1]] + imgDepth[handPos[2], handPos[3]])/2
+            if drawCirclesDEPTH == True:
+                cv.circle(imgDepth, (meanx, meany), 4, (0, 255, 0), -1)
+            if drawCirclesRGB == True:
+                cv.circle(imgCol, (meanx, meany), 4, (0, 255, 0), -1)
             centerDiff = [Center[0]-meanx, Center[1]-meanx] # Contains y and x coordinate difference between hands mean and center respectively
+            returnPackage = [Center, centerDiff, meany, meanx, centerDiffLenght]
 
-            paperbin = [Center, centerDiff, meany, meanx]
-            
-            return imgCol, fingertips, paperbin
+        if len(handPos) == 2:
+            if drawCirclesDEPTH == True:
+                cv.circle(imgDepth, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+            if drawCirclesRGB == True:
+                cv.circle(imgCol, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
 
-    paperbin = [0, 0, 0, 0]
+        if len(handPos) == 4:
+            if drawCirclesDEPTH == True:
+                cv.circle(imgDepth, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                cv.circle(imgDepth, (handPos[3], handPos[2]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+            if drawCirclesRGB == True:
+                cv.circle(imgCol, (handPos[1], handPos[0]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+                cv.circle(imgCol, (handPos[3], handPos[2]), 4, (int(255/20)*(col*4), 255-int(255/20)*(col*5), 255), cv.FILLED)
+            return imgCol, returnPackage
 
-    return imgCol, fingertips, paperbin
+    returnPackage = [0, 0, 0, 0, 0]
+
+    return imgCol, returnPackage
+
+def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi/2), FOVy=1.03, xwidth=1280, yheight=720):
+    # xp = x coordinate in pixels, yp = y coordinate in pixels. h = 3D distance to point.
+    # All angles are in radians
+    thetax = (FOVx/xwidth)*(xp-(xwidth/2))
+    thetay = (FOVy/yheight)*(yp-(yheight/2))
+    x = h*np.sin(thetax)
+    y = h*np.sin(thetay)
+    z = h*np.cos(thetax)
+    pos = [x, y, z]
+    return pos
 
 
 if __name__ == '__main__':
-    main(ur10Pose)
+    main()
