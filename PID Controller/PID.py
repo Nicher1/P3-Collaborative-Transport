@@ -1,5 +1,6 @@
 from cmath import inf
 import time
+from time import perf_counter
 import createdryverail as dryve
 import numpy as np
 import matplotlib.pyplot as plt
@@ -128,9 +129,9 @@ def moveRealTimeCoordinate(x, z):
 
 # Main Setup (Can be removed)
 run = True
-SP = [0, 100, 0]
+SP = [0.1, 0, 0]
 starting_time = time.time()
-plt.axhline(y=100, color='orange', linestyle='-')
+plt.axhline(y=1000, color='orange', linestyle='-')
 plt.xlabel("Time")
 plt.title("PID Controller")
 x = list()
@@ -139,15 +140,15 @@ y = list()
 dryve.dryveInit()  # (Commented out since I am testing the UR10)
 
 # Initilize robot
-#robotModle, robot = initializeRobot()
+robotModle, robot = initializeRobot()
 
 # Main Setup (This needs to remain in main)
-constants_y = [2, 0, 0]  # [1,0.002,0.01]
+constants_y = [1, 0.002, 0.01]  # [1,0.002,0.01]
 constants_xz = [1, 1, 1]
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=-300)
 PIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1, lim_min=0)  # A position of max 100 mm will give a velocity of 125 mm/s
 
-
+time_constant = perf_counter()
 while run == True:
     if SP[1] > 0:
 
@@ -156,7 +157,7 @@ while run == True:
         velocity = PIDy.update(feedback=PV, target=SP[1])
         velocity = int(round(velocity))
         dryve.targetVelocity(velocity)
-        x.append(time.time())
+        x.append(perf_counter()-time_constant)
         y.append(PV)
 
 
