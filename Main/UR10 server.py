@@ -53,13 +53,15 @@ def respondUDP(object, subindex, readData):
 # Function which links the information to the correct object and subindex.
 def interpretUDPCommand(object, subindex, rw, information):
     if rw == 0:
+        readData = 0
         if object == 1:
             if subindex == 0:
-                UR10.inverseTranMat()[subindex] = information
+                readData = UR10.inverseTranMat()[subindex]
             if subindex == 1:
-                UR10.inverseTranMat()[subindex] = information
+                readData = UR10.inverseTranMat()[subindex]
             if subindex == 2:
-                UR10.inverseTranMat()[subindex] = information
+                readData = UR10.inverseTranMat()[subindex]
+        return readData
     elif rw == 1:
         if object == 1:
             if subindex == 3:
