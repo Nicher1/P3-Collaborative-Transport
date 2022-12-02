@@ -37,92 +37,56 @@ host = '172.31.1.115'   #E.g. a Universal Robot offline simulator, please adjust
 acc = 0.9
 vel = 0.9
 
+'''
+class UR10:
 
+    #get the actual position of the robot
+    x_position = robot.get_actual_tcp_pose(0)
+    z_position = robot.get_actual_tcp_pose(2)
+'''
 
-def RealTimeMovement():
-    '''
-    This is a small example of how to connect to a Universal Robots robot and use a few simple script commands. 
-    The scrips available is in general all the scrips from the universal robot script manual, 
-    and the implementation is intended to follow the Universal Robots manual as much as possible.  
-    
-    This script can be run connected to a Universal Robot robot (tested at a UR5) or a Universal Robot offline simulator. 
-    See this example in how to setup an offline simulator: 
-    https://www.universal-robots.com/download/?option=26266#section16597
-    '''
+'''
+This is a small example of how to connect to a Universal Robots robot and use a few simple script commands. 
+The scrips available is in general all the scrips from the universal robot script manual, 
+and the implementation is intended to follow the Universal Robots manual as much as possible.  
+
+This script can be run connected to a Universal Robot robot (tested at a UR5) or a Universal Robot offline simulator. 
+See this example in how to setup an offline simulator: 
+https://www.universal-robots.com/download/?option=26266#section16597
+'''
+
+def initializeRobot():
     robotModle = URBasic.robotModel.RobotModel()
     robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle)
     robot.reset_error()
     #robot.init_realtime_control()
-
-    def moveRealTimeCoordinate(x,z):
-        rot = np.array([[0.7071, -0.7071, 0],
-                        [0.7071, 0.7071, 0],
-                        [0, 0, 1]])
-        movementVec = np.array([x,0,z])
-        movementVec = np.matmul(rot, movementVec)
-        currentPose = robot.get_actual_tcp_pose()
-        currentPose[0:3] = currentPose[0:3]+movementVec
-        robot.set_realtime_pose(currentPose)
 
     ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
                          [0, 0.7071, -0.7071, - 0.3],
                          [1, 0, 0, 0.300],
                          [0, 0, 0, 1]])
     robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
-    moveRealTimeCoordinate(0,0.01)
+    return robotModle, robot
 
+
+def moveRealTimeCoordinate(x,z):
+    rot = np.array([[0.7071, -0.7071, 0],
+                    [0.7071, 0.7071, 0],
+                    [0, 0, 1]])
+    movementVec = np.array([x,0,z])
+    movementVec = np.matmul(rot, movementVec)
+    currentPose = robot.get_actual_tcp_pose()
+    currentPose[0:3] = currentPose[0:3]+movementVec
+    robot.set_realtime_pose(currentPose)
+
+
+
+if __name__ == "__main__":
+    robotModle, robot = initializeRobot()
+    moveRealTimeCoordinate(0,0.2)
     time.sleep(1)
     robot.end_force_mode()
     robot.close()
 
-def ExampleExtendedFunctions():
-    '''
-    This is an example of an extension to the Universal Robot script library. 
-    How to update the force parameters remote via the RTDE interface, 
-    hence without sending new programs to the controller.
-    This enables to update force "realtime" (125Hz)  
-    '''
-    robotModle = URBasic.robotModel.RobotModel()
-    robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle)
 
-    print('forcs_remote')
-    robot.set_force_remote(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., 20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
-    robot.reset_error()
-    a = 0
-    upFlag = True
-    while a<3:
-        pose = robot.get_actual_tcp_pose()
-        if pose[2]>0.1 and upFlag:
-            print('Move Down')
-            robot.set_force_remote(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
-            a +=1
-            upFlag = False
-        if pose[2]<0.0 and not upFlag:
-            print('Move Up')
-            robot.set_force_remote(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., 20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
-            upFlag = True    
-    robot.end_force_mode()
-    robot.reset_error()
-    robot.close()
-    
-
-def ExampleFT_sensor():
-    '''
-    This is a small example of how to connect to a Robotiq FORCE TORQUE SENSOR and read data from the sensor.
-    To run this part comment in the function call in the main call below.
-
-    '''
-    robotModle = URBasic.robotModel.RobotModel()
-    robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle,hasForceTorque=True)
-
-    print(robotModle.dataDir['urPlus_force_torque_sensor'])
-    time.sleep(1)
-    print(robotModle.dataDir['urPlus_force_torque_sensor'])
-    robot.close()
-        
-
-if __name__ == '__main__':
-    RealTimeMovement()
-    #ExampleExtendedFunctions()
-    #ExampleFT_sensor()
     
