@@ -3,7 +3,14 @@ import time
 import createdryverail as dryve
 import matplotlib.pyplot as plt
 from collections import deque
+import URBasic
+import numpy as np
+from URBasic import kinematic
+from URBasic.kinematic import Invkine_manip, Tran_Mat2Pose, Pose2Tran_Mat
 
+host = '172.31.1.115'   #E.g. a Universal Robot offline simulator, please adjust to match your IP
+acc = 0.9
+vel = 0.9
 
 class PID:
 
@@ -89,14 +96,96 @@ class PID:
         # Returns the output
         return output
 
+def moveRealTimeCoordinate(x, z):
+    rot = np.array([[0.7071, -0.7071, 0],
+                    [0.7071, 0.7071, 0],
+                    [0, 0, 1]])
+        movementVec = np.array([x, 0, z])
+        movementVec = np.matmul(rot, movementVec)
+        currentPose = robot.get_actual_tcp_pose()
+        currentPose[0:3] = currentPose[0:3] + movementVec
+        robot.set_realtime_pose(currentPose)
+
+    ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
+                         [0, 0.7071, -0.7071, - 0.3],
+                         [1, 0, 0, 0.300],
+                         [0, 0, 0, 1]])
+    robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
+    moveRealTimeCoordinate(0, 0.01)
+
+    time.sleep(1)
+    robot.end_force_mode()
+    robot.close()
+
+
+def ExampleExtendedFunctions():
+    '''
+    This is an example of an extension to the Universal Robot script library.
+    How to update the force parameters remote via the RTDE interface,
+    hence without sending new programs to the controller.
+    This enables to update force "realtime" (125Hz)
+    '''
+    robotModle = URBasic.robotModel.RobotModel()
+    robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=robotModle)
+
+    print('forcs_remote')
+    robot.set_force_remote(task_frame=[0., 0., 0., 0., 0., 0.], selection_vector=[0, 0, 1, 0, 0, 0],
+                           wrench=[0., 0., 20., 0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
+    robot.reset_error()
+    a = 0
+    upFlag = True
+    while a < 3:
+        pose = robot.get_actual_tcp_pose()
+        if pose[2] > 0.1 and upFlag:
+            print('Move Down')
+            robot.set_force_remote(task_frame=[0., 0., 0., 0., 0., 0.], selection_vector=[0, 0, 1, 0, 0, 0],
+                                   wrench=[0., 0., -20., 0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
+            a += 1
+            upFlag = False
+        if pose[2] < 0.0 and not upFlag:
+            print('Move Up')
+            robot.set_force_remote(task_frame=[0., 0., 0., 0., 0., 0.], selection_vector=[0, 0, 1, 0, 0, 0],
+                                   wrench=[0., 0., 20., 0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
+            upFlag = True
+    robot.end_force_mode()
+    robot.reset_error()
+    robot.close()
+
+
+def ExampleFT_sensor():
+    '''
+    This is a small example of how to connect to a Robotiq FORCE TORQUE SENSOR and read data from the sensor.
+    To run this part comment in the function call in the main call below.
+
+    '''
+    robotModle = URBasic.robotModel.RobotModel()
+    robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=robotModle, hasForceTorque=True)
+
+    print(robotModle.dataDir['urPlus_force_torque_sensor'])
+    time.sleep(1)
+    print(robotModle.dataDir['urPlus_force_torque_sensor'])
+    robot.close()
+
+
 
 # Main Setup (Can be removed)
 run = True
-SP = [0, 10, 0]
+SP = [0, 500, 0]
 starting_time = time.time()
 
+#dryve.dryveInit()   # (Commented out since I am testing the UR10)
+
+#Initialise Commands:
+robotModle = URBasic.robotModel.RobotModel()
+robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=robotModle)
+robot.reset_error()
+ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
+                     [0, 0.7071, -0.7071, - 0.3],
+                     [1, 0, 0, 0.300],
+                     [0, 0, 0, 1]])
+robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
+
 # Main Setup (This needs to remain in main)
-dryve.dryveInit()   # (Commented out since I am testing the UR10)
 constants_y = [1,0.002,0.01]
 constants_xz = [1, 1, 1]
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)
