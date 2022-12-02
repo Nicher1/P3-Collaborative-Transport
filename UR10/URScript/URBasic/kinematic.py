@@ -72,6 +72,8 @@ def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob='ur10',tcpOffset=
         for ii in range(6):
             k = np.round((kk[ii]-init_joint_pos[ii])/2/np.pi)
             out.append(kk[ii]-k*2*np.pi)
+        out = np.array(out)
+        init_joint_pos = np.array(init_joint_pos)
         error.append(np.abs(np.sum(init_joint_pos-out)))
         
     ix = error==np.min(error)
@@ -456,22 +458,23 @@ def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]
     init_joint_pos (optional) = the initial joint vector
     '''
     # Define a robot from URDF file
-    my_chain = ik.chain.Chain.from_urdf_file('URDF/UR5.URDF')        
+    my_chain = ik.chain.Chain.from_urdf_file('ur10.urdf')
     #Convert pos to transfer matrix
     #Mar = Pose2Tran_Mat(target_pos)
 
-    T_target = Pose2Tran_Mat(pose=target_pos)
+    #T_target = Pose2Tran_Mat(pose=target_pos)
+    T_target = target_pos
     T_tcp = Pose2Tran_Mat(pose=tcpOffset)
     Mar = np.matmul(T_target, np.linalg.inv(T_tcp))
-
-    #Inverse kinematics       
+    #Inverse kinematics
     if len(init_joint_pos)<6 :            
         return None
     else:
         joint_init = init_joint_pos.copy()       
     # add a [0] at the base frame
     joint_initadd = np.zeros([7])
-    joint_initadd[1:] = joint_init[:]        
+    joint_initadd[1:] = joint_init[:]
+    print(joint_initadd.copy())
     ikin = my_chain.inverse_kinematics(target=Mar,initial_position=joint_initadd.copy())
     
     print('***************************************************************************')
