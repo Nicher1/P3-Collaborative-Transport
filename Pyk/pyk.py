@@ -31,7 +31,7 @@ robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
 
 # Setup constants for use in main(), which needs to be defined only once
 InnerThresh = 0.05
-OuterThresh = 0.1
+OuterThresh = 0.075
 col = (0, 255, 0)
 
 # Definition of mediapipe tracking solutions and drawing styles
@@ -84,10 +84,10 @@ assert k4a.whitebalance == 4510
 ###########################   FUNCTIONS   ########################### 
 #####################################################################
 
-def main():
+def main(initPose):
     while True:
-        toDoOrNotToDo = cameraUI()
-        print(toDoOrNotToDo)
+        toDoOrNotToDo = cameraUI(initPose)
+        #print(toDoOrNotToDo)
 
 def moveDirectionVec(startPosition, movementVec):
         '''
@@ -105,7 +105,8 @@ def moveDirectionVec(startPosition, movementVec):
         return newPosition
 
 # primary function containing all main code
-def cameraUI():
+def cameraUI(initPose):
+    ur10Pose = initPose
     k4aCapture = k4a.get_capture()
     if np.any(k4aCapture.color):
         capCol = cv.cvtColor(k4aCapture.color, cv.COLOR_BGRA2BGR)
@@ -136,6 +137,7 @@ def cameraUI():
 
             else:
                 centerDiff = np.array([0,centerDiff[1]/100,centerDiff[0]/100])
+                print(centerDiff)
                 ur10Pose = moveDirectionVec(ur10Pose,centerDiff)
 
 
@@ -161,7 +163,7 @@ def detectHands(Input_img_col, Input_img_depth):
     col = 0
     if results.multi_hand_landmarks:
         handPos = []
-        print("-------------------------------")
+        #print("-------------------------------")
         for handLms in results.multi_hand_landmarks:
             col += 1
             for id, hand in enumerate(handLms.landmark):
@@ -194,4 +196,4 @@ def detectHands(Input_img_col, Input_img_depth):
 
 
 if __name__ == '__main__':
-    main()
+    main(ur10Pose)
