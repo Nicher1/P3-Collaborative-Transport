@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="Push rail code, and fix negative velocity issue">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UR10/Rail/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/UR10/Rail/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,6 +50,7 @@
       <updated>1668947198874</updated>
       <workItem from="1668947203567" duration="1574000" />
       <workItem from="1669968323760" duration="529000" />
+      <workItem from="1669969442132" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="Push Rail code">
       <created>1669717403085</created>
