@@ -45,11 +45,10 @@ class Robot:
         self.robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=self.robotMod)
         self.robot.reset_error()
 
-
     def setup(self):
-        ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
-                             [0, 0.7071, -0.7071, - 0.3],
-                             [1, 0, 0, 0.3],
+        ur10Pose = np.array([[-0.7071, 0, -0.7071, -0.3],
+                             [0.7071, 0, -0.7071, - 0.3],
+                             [0, -1, 0, 0.3],
                              [0, 0, 0, 1]])
         self.robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
         time.sleep(1)
@@ -67,19 +66,20 @@ class Robot:
         currentPose[0:3] = currentPose[0:3] + movementVec
         self.robot.set_realtime_pose(currentPose)
 
-    def inverseTranMat(self,coordinate):
+    def inverseTranMat(self, coordinate):
         currentPose = self.robot.get_actual_tcp_pose()
         tranMat = kinematic.Pose2Tran_Mat(currentPose)
         tranMat = np.linalg.inv(tranMat)
         print(tranMat)
-        return tranMat[coordinate,-1]
+        return int(round(tranMat[coordinate, -1] * 1000))
+
 
 if __name__ == "__main__":
     UR10 = Robot()
     UR10.setup()
     UR10.moveRTC(-100, 100)
-    poseX = int(round(UR10.inverseTranMat(0)*1000))
-    poseY = int(round(UR10.inverseTranMat(1)*1000))
-    poseZ = int(round(UR10.inverseTranMat(2)*1000))
-    print(poseX,poseY,poseZ)
+    poseX = UR10.inverseTranMat(0)
+    poseY = UR10.inverseTranMat(1)
+    poseZ = UR10.inverseTranMat(2)
+    print(poseX, poseY, poseZ)
     time.sleep(1)
