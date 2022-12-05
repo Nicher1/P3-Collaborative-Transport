@@ -56,11 +56,11 @@ def interpretUDPCommand(object, subindex, rw, information):
         readData = 0
         if object == 1:
             if subindex == 0:
-                readData = UR10.inverseTranMat()[subindex]
+                readData = UR10.inverseTranMat(subindex)
             if subindex == 1:
-                readData = UR10.inverseTranMat()[subindex]
+                readData = UR10.inverseTranMat(subindex)
             if subindex == 2:
-                readData = UR10.inverseTranMat()[subindex]
+                readData = UR10.inverseTranMat(subindex)
         return readData
     elif rw == 1:
         if object == 1:
