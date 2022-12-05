@@ -1,20 +1,31 @@
 import socket
-import createdryverail as cdr
 import time
 
 # Addresses and ports
 localAddress = "127.0.0.1"
 buffersize = 9
 
-SERVER_PORT = 20004  # Define this servers port number
-CLIENT_PORT = 20003  # Define which port on the client the server is going to communicate with
+SERVER_PORT = 20008  # Define this servers port number
+CLIENT_PORT = 20007  # Define which port on the client the server is going to communicate with
 
-cdr.dryveInit()
+# Main code that runs once, abselutly has to be there or there is no PID controller
+constants_y = [1, 0.002, 0.01]
+constants_xz = [1, 1, 1]
+PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)
+PIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1,
+            lim_min=0)  # A position of max 100 mm will give a velocity of 125 mm/s
+
 
 # Create socket and bind it to a port
 server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 server.bind((localAddress, SERVER_PORT))
 
+
+class testClass:
+    position = [0, 0, 0]
+
+
+testUR10 = testClass
 
 
 # -------------------------------------------------
@@ -52,28 +63,24 @@ def respondUDP(object, subindex, readData):
 
 # Function which links the information to the correct object and subindex.
 def interpretUDPCommand(object, subindex, rw, information):
-    
     if rw == 0:  # Determine if the information should be read or written to the object.
         readData = 0
-        if object == 11:
+        if object == 1:
             if subindex == 1:
-                readData = cdr.getPosition()
-        return readData
-    
-    elif rw == 1:
-        if object == 11:
-            if subindex == 0:
-                cdr.targetPosition(information)
+                readData = testUR10.position[0]
             if subindex == 2:
-                cdr.profileVelocity(information)
-        elif object == 12:
-            if subindex == 0:
-                cdr.targetVelocity(information)
-        elif object == 13:
-            if subindex == 0:
-                cdr.homing()
-
-
+                readData = testUR10.position[1]
+            if subindex == 3:
+                readData = testUR10.position[2]
+        return readData
+    elif rw == 1:
+        if object == 1:
+            if subindex == 1:
+                testUR10.position[0] = information
+            if subindex == 2:
+                testUR10.position[1] = information
+            if subindex == 3:
+                testUR10.position[2] = information
 
     else:
         print("Error - Invalid read/write command")
@@ -100,3 +107,4 @@ def recieveAndUnpack():
 
 while True:
     recieveAndUnpack()
+    print(testUR10.position)

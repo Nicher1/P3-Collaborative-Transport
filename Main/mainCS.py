@@ -18,6 +18,7 @@ class subsys:
 ur10 = subsys(20001, 20002)
 rail = subsys(20003, 20004)
 camera = subsys(20005, 20006)
+PID = subsys(20007, 20008)
 
 def extractBytes(integer):
     firstArray = divmod(integer, 0x100)
