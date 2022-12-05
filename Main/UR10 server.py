@@ -1,5 +1,6 @@
 import socket
 import time
+import MovementCommand
 
 # Addresses and ports
 localAddress = "127.0.0.1"
@@ -8,17 +9,12 @@ buffersize = 9
 SERVER_PORT = 20002  # Define this servers port number
 CLIENT_PORT = 20001  # Define which port on the client the server is going to communicate with
 
-#UR10.setup()
+UR10 = Robot()
+UR10.setup()
 
 # Create socket and bind it to a port
 server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 server.bind((localAddress, SERVER_PORT))
-
-class testClass:
-
-    position = [0, 0, 0]
-        
-testUR10 = testClass
 
 # -------------------------------------------------
 
@@ -92,4 +88,3 @@ def recieveAndUnpack():
 
 while True:
     recieveAndUnpack()
-    print(testUR10.position)
