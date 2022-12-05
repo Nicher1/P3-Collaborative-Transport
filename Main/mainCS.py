@@ -1,6 +1,9 @@
 import socket
 import time
 import numpy as np
+import sys
+sys.path_insert(0, "..")
+from PIDConroller.URScript.just_PID import PID
 
 # Client code -------------------------------------------------------
 
@@ -25,7 +28,6 @@ class subsys:
 ur10 = subsys(20001, 20002)
 rail = subsys(20003, 20004)
 camera = subsys(20005, 20006)
-PID = subsys(20007, 20008)
 
 def extractBytes(integer):
     firstArray = divmod(integer, 0x100)
@@ -140,7 +142,7 @@ while True:
     goalPos = humanPosGlobal + np.array([1000, 0, 0])  #GoalPos is given by a translation form the humanPos, which is our restrictions.
     error = goalPos - towelPosGlobal
 
-    #PID CONTROLLER SOMETHING SOMETHING!
+    pid = PID(1, 0.002, 0.01, -300, 300)
 
     # Step 3: Push new information to rail and UR10.
     communicateUDP(rail, 12, rw=1, information=PIDoutput[1])  # Target velocity for rail
