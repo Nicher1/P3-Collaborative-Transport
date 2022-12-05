@@ -53,8 +53,8 @@ def communicateUDP(sub_system, object, subindex=0, rw=0, information=0, nr_of_fo
         recieved = combineBytes(recieved[3], recieved[4:8])
         return recieved
 
-def recieveAndUnpack():
-    data = server.recvfrom(buffersize)
+def recieveAndUnpack(sub_system):
+    data = sub_system.s.recvfrom(buffersize)
     data = list(data[0])
     object = data[0]
     subindex = data[1]
@@ -66,7 +66,7 @@ def recieveAndUnpack():
     interpretUDPCommand(object, subindex, rw, information)
 
     if followingMessages > 0:
-        recieveAndUnpack()
+        recieveAndUnpack(sub_system)
 
 # Function which links the information to the correct object and subindex.
 def interpretUDPCommand(object, subindex, rw, information):
@@ -76,14 +76,14 @@ def interpretUDPCommand(object, subindex, rw, information):
     elif rw == 1:
         if object == 21:
             if subindex == 0:
-                cameraData.cameraData[0] = information
+                cameraData.currentPos[0] = information
             if subindex == 1:
-                cameraData.cameraData[1] = information
+                cameraData.currentPos[1] = information
             if subindex == 2:
-                cameraData.cameraData[2] = information
+                cameraData.currentPos[2] = information
         if object == 22:
             if subindex == 0:
-                cameraData.cameraData = information
+                cameraData.state = information
 
     else:
         print("Error - Invalid read/write command")
@@ -96,22 +96,22 @@ class cameraData:
 
 cameraData = cameraData()
 
-T_camera_EE = np.array([1, 0, 0, -32],
+T_camera_EE = np.array([[1, 0, 0, -32],
                            [0, 1, 0, 48],
                            [0, 0, 1, -175],
-                           [0, 0, 0, 1])
+                           [0, 0, 0, 1]])
 
 T_towel_EE = np.array([0, 21, -80])
 
-T_EE_robotbase = np.array([0, 1, 0, 0],
+T_EE_robotbase = np.array([[0, 1, 0, 0],
                            [0, 0, -1, 0],
                            [-1, 0, 0, 0],
-                           [0, 0, 0, 1])
+                           [0, 0, 0, 1]])
 
-T_robotbase_global = np.array([1, 0, 0, 0],
+T_global_robotbase = np.array([[1, 0, 0, 0],
                                   [0, 1, 0, 0],
                                   [0, 0, 1, 0],
-                                  [0, 0, 0, 1])
+                                  [0, 0, 0, 1]])
 
 while True:
     # Step 1: Update all variables (attain current position, and human position from camera)
@@ -122,19 +122,19 @@ while True:
 
     T_robotbase_global[1, 3] = communicateUDP(rail, 11, 1, nr_of_following_messages=0)
 
-    recieveAndUnpack()  # Collect the latest information from the camera, and store it in cameraData
-    humanPosGlobal = cameraData.currentPos*T_camera_EE*T_EE_robotbase*T_robotbase_global
+    recieveAndUnpack(camera)  # Collect the latest information from the camera, and store it in cameraData
+    humanPosGlobal = np.dotP(T)
 
-    towelPosGlobal = T_towel_EE*T_EE_robotbase*T_robotbase_global  # The current position of our towel/end effector in global frame.
+    #towelPosGlobal = T_towel_EE*T_EE_robotbase*T_robotbase_global  # The current position of our towel/end effector in global frame.
 
     # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
 
-    goalPos = humanPosGlobal + np.array([1000, 0, 0])  #GoalPos is given by a translation form the humanPos, which is our restrictions.
-    error = goalPos - towelPosGlobal
+    #goalPos = humanPosGlobal + np.array([1000, 0, 0])  #GoalPos is given by a translation form the humanPos, which is our restrictions.
+    #error = goalPos - towelPosGlobal
 
     #PID CONTROLLER SOMETHING SOMETHING!
 
     # Step 3: Push new information to rail and UR10.
-    communicateUDP(rail, 12, rw=1, information=PIDoutput[1])  # Target velocity for rail
-    communicateUDP(ur10, 1, 3, rw=1, information=PIDoutput[0], nr_of_following_messages=1)
-    communicateUDP(ur10, 1, 4, rw=1, information=PIDoutput[2], nr_of_following_messages=0)
+    # communicateUDP(rail, 12, rw=1, information=PIDoutput[1])  # Target velocity for rail
+    # communicateUDP(ur10, 1, 3, rw=1, information=PIDoutput[0], nr_of_following_messages=1)
+    # communicateUDP(ur10, 1, 4, rw=1, information=PIDoutput[2], nr_of_following_messages=0)

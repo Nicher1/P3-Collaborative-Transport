@@ -111,12 +111,6 @@ assert k4a.whitebalance == 4510
 #####################################################################
 ###########################   FUNCTIONS   ###########################
 #####################################################################
-
-def main():
-    while True:
-        cameraUI()
-        recieveAndUnpack()
-        print("Looped")
        
 
 
@@ -189,6 +183,20 @@ def recieveAndUnpack():
 
     if followingMessages > 0:
         recieveAndUnpack()
+
+def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_following_messages=0):
+
+    # Format data
+    sign = 0
+    if information < 0:
+        sign = 1
+        information = abs(information)
+    information = extractBytes(information)
+    package = [object, subindex, rw, sign, information[0], information[1], information[2], information[3], nr_of_following_messages]
+    package_array = bytes(package)
+
+    # Send data
+    server.sendto(package_array, (localAddress, CLIENT_PORT))
 
 # primary function containing all main code
 def cameraUI():
@@ -335,6 +343,13 @@ def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi / 2), FOVy=1.03, xwidth=1280, yheig
     pos = [x, y, z]
     return pos
 
+def main():
+    while True:
+        cameraUI()
+        communicateUDPcamera(21, 0, 1, pos.position[0], nr_of_following_messages=3)
+        communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
+        communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
+        communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
 
 if __name__ == '__main__':
     main()
