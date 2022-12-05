@@ -58,12 +58,9 @@ pos = camera()
 state = currentState()
 
 # Setup constants for use in main(), which needs to be defined only once
-InnerThresh = 0.05
-OuterThresh = 0.1
+InnerThresh = 0.10
+OuterThresh = 0.20
 col = (0, 255, 0)
-
-# Dlete this variable below
-iteration = 0
 
 # Definition of mediapipe tracking solutions and drawing styles
 mp_drawing = mp.solutions.drawing_utils
@@ -117,9 +114,9 @@ assert k4a.whitebalance == 4510
 
 def main():
     while True:
-        for i in range(5):
-           cameraUI()
+        cameraUI()
         recieveAndUnpack()
+        print("Looped")
        
 
 

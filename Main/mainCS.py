@@ -1,5 +1,8 @@
 import socket
+import time
+import numpy as np
 
+# Client code -------------------------------------------------------
 
 # Addresses and ports
 localAddress = "127.0.0.1"
@@ -50,10 +53,30 @@ def communicateUDP(sub_system, object, subindex=0, rw=0, information=0, nr_of_fo
         recieved = combineBytes(recieved[3], recieved[4:8])
         return recieved
 
+# End Client code ---------------------------------------------------------------
+
+# T_EE_Camera = np.array([1, 0, 0, 32],
+#                        [0, 1, 0, -48],
+#                        [0, 0, 1, 175],
+#                        [0, 0, 0, 1])
+#
+# T_RBase_EE = np.array([0, 0, -1, EE_posx],
+#                       [1, 0, 0, EE_posy],
+#                       [0, -1, 0, EE_posz],
+#                       [0, 0, 0, 1])
+#
+# T_Global_RBase = np.array([1, 0, 0, 0],
+#                           [0, 1, 0, railLength],
+#                           [0, 0, 1, 0],
+#                           [0, 0, 0, 1])
+
+
 while True:
     if communicateUDP(camera, 32) == 1:
         cameraPos = [0, 0, 0]
         cameraPos[0] = communicateUDP(camera, 31, 0, nr_of_following_messages=2)
         cameraPos[1] = communicateUDP(camera, 31, 1, nr_of_following_messages=1)
         cameraPos[2] = communicateUDP(camera, 31, 2, nr_of_following_messages=0)
-        print(cameraPos)
+        railLength = communicateUDP(rail, 11, 1)
+        communicateUDP(rail, 11, rw=1, information=cameraPos[0]+railLength)
+        time.sleep(0.1)
