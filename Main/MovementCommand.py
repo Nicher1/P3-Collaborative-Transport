@@ -33,60 +33,53 @@ import numpy as np
 from URBasic import kinematic
 from URBasic.kinematic import Invkine_manip, Tran_Mat2Pose, Pose2Tran_Mat
 
-host = '172.31.1.115'   #E.g. a Universal Robot offline simulator, please adjust to match your IP
+host = '172.31.1.115'  # E.g. a Universal Robot offline simulator, please adjust to match your IP
 acc = 0.9
 vel = 0.9
 
-'''
-class UR10:
 
-    #get the actual position of the robot
-    x_position = robot.get_actual_tcp_pose(0)
-    z_position = robot.get_actual_tcp_pose(2)
-'''
+class Robot:
 
-'''
-This is a small example of how to connect to a Universal Robots robot and use a few simple script commands. 
-The scrips available is in general all the scrips from the universal robot script manual, 
-and the implementation is intended to follow the Universal Robots manual as much as possible.  
+    def __init__(self):
+        self.robotMod = URBasic.robotModel.RobotModel()
+        self.robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=self.robotMod)
+        self.robot.reset_error()
 
-This script can be run connected to a Universal Robot robot (tested at a UR5) or a Universal Robot offline simulator. 
-See this example in how to setup an offline simulator: 
-https://www.universal-robots.com/download/?option=26266#section16597
-'''
+    def setup(self):
+        ur10Pose = np.array([[-0.7071, 0, -0.7071, -0.3],
+                             [0.7071, 0, -0.7071, - 0.3],
+                             [0, -1, 0, 0.3],
+                             [0, 0, 0, 1]])
+        self.robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
+        time.sleep(1)
 
-def initializeRobot():
-    robotModle = URBasic.robotModel.RobotModel()
-    robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle)
-    robot.reset_error()
-    #robot.init_realtime_control()
+    def moveRTC(self, x, z):
+        '''
+        Real time movement given an x and z vector.
+        '''
+        rot = np.array([[0.7071, -0.7071, 0],
+                        [0.7071, 0.7071, 0],
+                        [0, 0, 1]])
+        movementVec = np.array([x / 1000, 0, z / 1000])
+        movementVec = np.matmul(rot, movementVec)
+        currentPose = self.robot.get_actual_tcp_pose()
+        currentPose[0:3] = currentPose[0:3] + movementVec
+        self.robot.set_realtime_pose(currentPose)
 
-    ur10Pose = np.array([[0, -0.7071, -0.7071, -0.3],
-                         [0, 0.7071, -0.7071, - 0.3],
-                         [1, 0, 0, 0.300],
-                         [0, 0, 0, 1]])
-    robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
-    return robotModle, robot
-
-
-def moveRealTimeCoordinate(x,z):
-    rot = np.array([[0.7071, -0.7071, 0],
-                    [0.7071, 0.7071, 0],
-                    [0, 0, 1]])
-    movementVec = np.array([x,0,z])
-    movementVec = np.matmul(rot, movementVec)
-    currentPose = robot.get_actual_tcp_pose()
-    currentPose[0:3] = currentPose[0:3]+movementVec
-    robot.set_realtime_pose(currentPose)
-
+    def inverseTranMat(self, coordinate):
+        currentPose = self.robot.get_actual_tcp_pose()
+        tranMat = kinematic.Pose2Tran_Mat(currentPose)
+        tranMat = np.linalg.inv(tranMat)
+        print(tranMat)
+        return int(round(tranMat[coordinate, -1] * 1000))
 
 
 if __name__ == "__main__":
-    robotModle, robot = initializeRobot()
-    moveRealTimeCoordinate(0,0.2)
+    UR10 = Robot()
+    UR10.setup()
+    UR10.moveRTC(-100, 100)
+    poseX = UR10.inverseTranMat(0)
+    poseY = UR10.inverseTranMat(1)
+    poseZ = UR10.inverseTranMat(2)
+    print(poseX, poseY, poseZ)
     time.sleep(1)
-    robot.end_force_mode()
-    robot.close()
-
-
-    

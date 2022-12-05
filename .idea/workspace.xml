@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="Changed some constants">
+    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="To Boegh">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UR10/PID Controller/PID.py" beforeDir="false" afterPath="$PROJECT_DIR$/UR10/PID Controller/PID.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PID Controller/PID.py" beforeDir="false" afterPath="$PROJECT_DIR$/PID Controller/PID.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,11 +29,11 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "WebServerToolWindowFactoryState": "false"
+  }
+}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -44,6 +44,7 @@
       <updated>1668947198874</updated>
       <workItem from="1668947203567" duration="1574000" />
       <workItem from="1669624327537" duration="3763000" />
+      <workItem from="1669984391462" duration="7204000" />
     </task>
     <task id="LOCAL−00001" summary="Added function for converting from pixel coordinates to euclidean coordinates.">
       <created>1669627565350</created>
@@ -65,7 +66,49 @@
       <option name="project" value="LOCAL" />
       <updated>1669971901245</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Made a file for just the PID controller to be implemented later on">
+      <created>1669973044638</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1669973044638</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Added a if statement to main">
+      <created>1669978257036</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1669978257037</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Placed comments on where the UDP needs to be and whether they should be read/write">
+      <created>1669978691104</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1669978691105</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Added some comments">
+      <created>1669978981408</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1669978981409</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added Matplotlib Plots">
+      <created>1669985214248</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1669985214248</updated>
+    </task>
+    <task id="LOCAL-00009" summary="To Boegh">
+      <created>1669990225750</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1669990225750</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -86,9 +129,16 @@
     <MESSAGE value="Added function for converting from pixel coordinates to euclidean coordinates." />
     <MESSAGE value="Added constants" />
     <MESSAGE value="Changed some constants" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed some constants" />
+    <MESSAGE value="Made a file for just the PID controller to be implemented later on" />
+    <MESSAGE value="Added a if statement to main" />
+    <MESSAGE value="Placed comments on where the UDP needs to be and whether they should be read/write" />
+    <MESSAGE value="Added some comments" />
+    <MESSAGE value="Added Matplotlib Plots" />
+    <MESSAGE value="To Boegh" />
+    <option name="LAST_COMMIT_MESSAGE" value="To Boegh" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PID_py$PID.coverage" NAME="PID Coverage Results" MODIFIED="1669971995456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/UR10/PID Controller" />
+    <SUITE FILE_PATH="coverage/PID_py$MovementCommand.coverage" NAME="MovementCommand Coverage Results" MODIFIED="1669974485722" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Main" />
+    <SUITE FILE_PATH="coverage/PID_py$PID.coverage" NAME="PID Coverage Results" MODIFIED="1669992236626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PID Controller" />
   </component>
 </project>
