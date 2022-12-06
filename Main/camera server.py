@@ -238,7 +238,7 @@ def cameraUI():
             else:
                 vect = pixelDist2EucDist(meanx, meany, length)
 
-            pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
+            pos.position = [int(vect[1]), int(vect[2]), int(vect[0])] # Returning position as [y, z, x] to correlate with global frame of UR10
 
             if meanx > Center[1] + (1 - OuterThresh) and meanx < Center[1] + (1 + OuterThresh) and meany > Center[0] - (
                     1 + OuterThresh) and meany < Center[0] + (1 + OuterThresh):
