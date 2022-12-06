@@ -14,11 +14,11 @@ buffersize = 9
 # Main code that runs once, abselutly has to be there or there is no PID controller
 constants_y = [1, 0.002, 0.01]
 constants_xz = [1, 0.002, 0.04]
-PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)
-PIDx = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1,
-            lim_min=0)  # A position of max 100 mm will give a velocity of 125 mm/s
-PIDz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1,
-            lim_min=0)
+PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=-300)
+PIDx = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100,
+            lim_min=100)  # A position of max 100 mm will give a velocity of 125 mm/s
+PIDz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100,
+            lim_min=100)
 class subsys:
     def __init__(self, CLIENT_PORT, SERVER_PORT):
         self.CLIENT_PORT = CLIENT_PORT
