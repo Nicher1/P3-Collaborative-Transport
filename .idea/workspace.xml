@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="Changed some constants">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main/MovementCommand.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

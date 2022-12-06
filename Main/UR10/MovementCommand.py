@@ -66,10 +66,14 @@ class Robot:
         currentPose[0:3] = currentPose[0:3] + movementVec
         self.robot.set_realtime_pose(currentPose)
 
-    def inverseTranMat(self, coordinate):
+    def getCurrentTranMat(self, coordinate):
+        rotation = np.array([[0.7071, 0.7071, 0, 0],
+                        [-0.7071, 0.7071, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]])
         currentPose = self.robot.get_actual_tcp_pose()
         tranMat = kinematic.Pose2Tran_Mat(currentPose)
-        tranMat = np.linalg.inv(tranMat)
+        tranMat = np.matmul(rotation, tranMat)
         print(tranMat)
         return int(round(tranMat[coordinate, -1] * 1000))
 
@@ -77,9 +81,10 @@ class Robot:
 if __name__ == "__main__":
     UR10 = Robot()
     UR10.setup()
-    UR10.moveRTC(-100, 100)
-    poseX = UR10.inverseTranMat(0)
-    poseY = UR10.inverseTranMat(1)
-    poseZ = UR10.inverseTranMat(2)
+    UR10.moveRTC(-400, 100)
+    time.sleep(1)
+    poseX = UR10.getCurrentTranMat(0)
+    poseY = UR10.getCurrentTranMat(1)
+    poseZ = UR10.getCurrentTranMat(2)
     print(poseX, poseY, poseZ)
     time.sleep(1)
