@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="To Boegh">
+    <list default="true" id="650cbf44-9080-41d7-8b59-4fde8c7a8342" name="Changes" comment="Changed some constants">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PIDController/PID.py" beforeDir="false" afterPath="$PROJECT_DIR$/PIDController/PID.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main/MovementCommand.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,13 +29,11 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;
-  }
-}</component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -46,7 +44,6 @@
       <updated>1668947198874</updated>
       <workItem from="1668947203567" duration="1574000" />
       <workItem from="1669624327537" duration="3763000" />
-      <workItem from="1670231912608" duration="3032000" />
     </task>
     <task id="LOCAL−00001" summary="Added function for converting from pixel coordinates to euclidean coordinates.">
       <created>1669627565350</created>
@@ -68,21 +65,7 @@
       <option name="project" value="LOCAL" />
       <updated>1669971901245</updated>
     </task>
-    <task id="LOCAL-00004" summary="Changed some constants">
-      <created>1670226130088</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1670226130088</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Changed some constants">
-      <created>1670226145033</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1670226145033</updated>
-    </task>
-    <option name="localTasksCounter" value="6" />
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -104,9 +87,5 @@
     <MESSAGE value="Added constants" />
     <MESSAGE value="Changed some constants" />
     <option name="LAST_COMMIT_MESSAGE" value="Changed some constants" />
-  </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PID_py$MovementCommand.coverage" NAME="MovementCommand Coverage Results" MODIFIED="1669974485722" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Main" />
-    <SUITE FILE_PATH="coverage/PID_py$PID.coverage" NAME="PID Coverage Results" MODIFIED="1670252521398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/PIDController" />
   </component>
 </project>
