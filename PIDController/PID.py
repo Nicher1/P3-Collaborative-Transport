@@ -62,7 +62,6 @@ class PID:
     def update(self, feedback: float, target: float) -> float:
         # Calculates the error
         error = target - feedback
-        print(target, " - ", feedback, " = ", error)
 
         # Sets the current time
         current_time = time.time()
@@ -136,21 +135,20 @@ class Robot:
         currentPose = self.robot.get_actual_tcp_pose()
         tranMat = kinematic.Pose2Tran_Mat(currentPose)
         tranMat = np.linalg.inv(tranMat)
-        print(tranMat)
         return int(round(tranMat[coordinate, -1] * 1000))
 
 
 # Main Setup (Can be removed)
 run = True
-SP = [-600, 400, 600]  # For xz the coordinate needs to be the tform of starting position + movement in desired direction
+SP = [-500, 0, 0]  # For xz the coordinate needs to be the tform of starting position + movement in desired direction
 starting_time = time.time()
-plt.axhline(y=1000, color='orange', linestyle='-')
+plt.axhline(y=-500, color='orange', linestyle='-')
 plt.xlabel("Time")
 plt.title("PID Controller")
 x = list()
 y = list()
 
-dryve.dryveInit()  # (Commented out since I am testing the UR10)
+#dryve.dryveInit()  # (Commented out since I am testing the UR10)
 # dryve.targetPosition(300)
 
 # Initilize robot
@@ -159,11 +157,11 @@ ur10.setup()
 
 # Main Setup (This needs to remain in main)
 constants_y = [1, 0.002, 0.01]  # [1,0.002,0.01]
-constants_xz = [1, 0, 0]
-PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=150, lim_min=-150)
-PIDx = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=50, lim_min=-50)
-PIDz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=50,
-           lim_min=-50)  # A position of max 100 mm will give a velocity of 125 mm/s
+constants_xz = [1, 0.002, 0.04] # [1,0.002,0.04]
+PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=-300)
+PIDx = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100, lim_min=-100)
+PIDz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100,
+           lim_min=-100)  # A position of max 100 mm will give a velocity of 125 mm/s
 
 positionx = 0
 positionz = 0
@@ -187,7 +185,6 @@ while run == True:
     if SP[0] != 0:
         xyz_list = ur10.robot.get_actual_tcp_pose()  # [x,y,z,rotx,roty,rotz]
         VPx = xyz_list[0] * 1000
-        print("Current Position: ", xyz_list[0])
         positionx = PIDx.update(feedback=VPx, target=SP[0])
         positionx = int(round(positionx))
 
@@ -199,12 +196,19 @@ while run == True:
 
     ur10.moveRTC(positionx, positionz)
     time.sleep(0.001)
+    print("I am at ", ur10.robot.get_actual_tcp_pose())
+    x.append(perf_counter() - time_constant)
+    y.append(VPx)
+
+
+    if positionx == 0 and positionz == 0:
+        run = False
 
 # plotter(PID=PID_holder, time=time_holder)
 time.sleep(1)
-ny_VP = dryve.getPosition()
-print(PV, " and ", ny_VP)
-# xyz_check = robot.get_actual_tcp_pose()
+#ny_VP = dryve.getPosition()
+#print(PV, " and ", ny_VP)
+#xyz_check = robot.get_actual_tcp_pose()
 # print(PV, " and ", xyz_check[0])
 plt.plot(x, y)
 plt.show()
