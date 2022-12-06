@@ -1,9 +1,7 @@
 import socket
 import time
 import numpy as np
-import sys
-sys.path_insert(0, "..")
-from PIDConroller.URScript.just_PID import PID
+from PIDController.just_PID import PID
 
 # Client code -------------------------------------------------------
 
@@ -16,9 +14,10 @@ constants_y = [1, 0.002, 0.01]
 constants_xz = [1, 0.002, 0.04]
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=-300)
 PIDx = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100,
-            lim_min=100)  # A position of max 100 mm will give a velocity of 125 mm/s
+            lim_min=-100)  # A position of max 100 mm will give a velocity of 125 mm/s
 PIDz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=100,
-            lim_min=100)
+            lim_min=-100)
+
 class subsys:
     def __init__(self, CLIENT_PORT, SERVER_PORT):
         self.CLIENT_PORT = CLIENT_PORT
@@ -102,7 +101,7 @@ def interpretUDPCommand(object, subindex, rw, information):
 # End Client code ---------------------------------------------------------------
 
 class cameraData:
-    currentPos = [0, 0, 0]
+    currentPos = [0, 0, 0, 1]
     state = False
 
 cameraData = cameraData()
@@ -112,7 +111,7 @@ T_EE_camera = np.array([[1, 0, 0, 32],
                            [0, 0, 1, 175],
                            [0, 0, 0, 1]])
 
-T_EE_towel = np.array([0, -21, 80])
+T_EE_towel = np.array([0, -21, 80, 1])
 
 T_robotbase_EE = np.array([[0, 0, -1, 0],
                            [1, 0, 0, 0],
@@ -138,10 +137,11 @@ while True:
 
     towelPosGlobal = np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_towel) # The current position of our towel/end effector in global frame.
 
-    print(f"humanPosGlobal: {humanPosGlobal}")
+    #print(f"humanPosGlobal: {humanPosGlobal}")
 
     # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
-    goalPos = humanPosGlobal + np.array([1000, 0, 0])  # GoalPos is given by a translation from the humanPos, which is our restrictions.
+    goalPos = humanPosGlobal + np.array([1000, 0, 0, 0])  # GoalPos is given by a translation from the humanPos, which is our restrictions.
+    #print(f"goalPos: {goalPos}")
 
     if cameraData.state == True:
         velocity_y = PIDy.update(feedback=towelPosGlobal[1], target=goalPos[1])
@@ -151,9 +151,15 @@ while True:
         position_x = int(round(position_x))
 
         position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
-        position_z = int(round(velocity_y))
+        position_z = int(round(position_z))
+
+        print(f"feedback: {towelPosGlobal[2]} target: {goalPos[2]}")
+        print(f"position_x: {position_z}")
+
+        #print(f"Data sent out: V = {velocity_y}, posX = {position_x}, posZ = {position_z}")
 
         # Step 3: Push new information to rail and UR10.
         communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
         communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1)
         communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0)
+        communicateUDP(ur10, 2, 0, rw=1) # Execute ur10

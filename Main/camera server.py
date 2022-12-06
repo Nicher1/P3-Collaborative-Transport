@@ -284,7 +284,7 @@ def detectHands(Input_img_col, Input_img_depth):
                 # print(id,hand)
                 cx, cy = int(hand.x * w), int(hand.y * h)
 
-                if id in [0]:
+                if id in [10]:
                     if printWristDist == True:
                         print("Dist wrist", col, ": ", imgDepth[cy, cx])
                     handPos.append(cy)

@@ -1,6 +1,10 @@
 import socket
 import time
-import MovementCommand
+import URBasic
+import time
+import numpy as np
+from URBasic import kinematic
+from URBasic.kinematic import Invkine_manip, Tran_Mat2Pose, Pose2Tran_Mat
 
 # Addresses and ports
 localAddress = "127.0.0.1"
@@ -8,6 +12,51 @@ buffersize = 9
 
 SERVER_PORT = 20002  # Define this servers port number
 CLIENT_PORT = 20001  # Define which port on the client the server is going to communicate with
+
+host = '172.31.1.115'  # E.g. a Universal Robot offline simulator, please adjust to match your IP
+acc = 0.9
+vel = 0.9
+
+class Robot:
+
+    def __init__(self):
+        self.robotMod = URBasic.robotModel.RobotModel()
+        self.robot = URBasic.urScriptExt.UrScriptExt(host=host, robotModel=self.robotMod)
+        self.robot.reset_error()
+
+    def setup(self):
+        ur10Pose = np.array([[-0.7071, 0, -0.7071, -0.3],
+                             [0.7071, 0, -0.7071, - 0.3],
+                             [0, -1, 0, 0.3],
+                             [0, 0, 0, 1]])
+        self.robot.movej(pose=kinematic.Tran_Mat2Pose(ur10Pose), a=acc, v=vel)
+        time.sleep(1)
+
+    setPosition = [0, 0]
+
+    def moveRTC(self, x, z):
+        '''
+        Real time movement given an x and z vector.
+        '''
+        rot = np.array([[0.7071, -0.7071, 0],
+                        [0.7071, 0.7071, 0],
+                        [0, 0, 1]])
+        movementVec = np.array([x / 1000, 0, z / 1000])
+        movementVec = np.matmul(rot, movementVec)
+        currentPose = self.robot.get_actual_tcp_pose()
+        currentPose[0:3] = currentPose[0:3] + movementVec
+        self.robot.set_realtime_pose(currentPose)
+
+    def getCurrentTranMat(self, coordinate):
+        rotation = np.array([[0.7071, 0.7071, 0, 0],
+                        [-0.7071, 0.7071, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]])
+        currentPose = self.robot.get_actual_tcp_pose()
+        tranMat = kinematic.Pose2Tran_Mat(currentPose)
+        tranMat = np.matmul(rotation, tranMat)
+        print(tranMat)
+        return int(round(tranMat[coordinate, -1] * 1000))
 
 UR10 = Robot()
 UR10.setup()
@@ -52,18 +101,21 @@ def interpretUDPCommand(object, subindex, rw, information):
         readData = 0
         if object == 1:
             if subindex == 0:
-                readData = UR10.inverseTranMat(subindex)
+                readData = UR10.getCurrentTranMat(subindex)
             if subindex == 1:
-                readData = UR10.inverseTranMat(subindex)
+                readData = UR10.getCurrentTranMat(subindex)
             if subindex == 2:
-                readData = UR10.inverseTranMat(subindex)
+                readData = UR10.getCurrentTranMat(subindex)
         return readData
     elif rw == 1:
         if object == 1:
             if subindex == 3:
-                UR10.moveRTC()[subindex] = information
+                UR10.setPosition[0] = information
             if subindex == 4:
-                UR10.moveRTC()[subindex] = information
+                UR10.setPosition[1] = information
+        if object == 2:
+            if subindex == 0:
+                UR10.moveRTC(UR10.setPosition[0], UR10.setPosition[1])
 
     else:
         print("Error - Invalid read/write command")

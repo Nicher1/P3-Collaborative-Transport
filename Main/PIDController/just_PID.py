@@ -1,5 +1,5 @@
 import time
-
+import math
 
 class PID:
 
@@ -22,7 +22,7 @@ class PID:
         self.last_time = time.time()
 
         # Sets the thresholding
-        self.set_limits(lim_min, lim_max, -inf, inf)
+        self.set_limits(lim_min, lim_max, -math.inf, math.inf)
 
     def set_limits(self, min: float, max: float, min_int: float, max_int: float) -> None:
 
@@ -73,40 +73,3 @@ class PID:
 
         # Returns the output
         return output
-
-
-# Main code that runs once, abselutly has to be there or there is no PID controller
-constants_y = [1, 0.002, 0.01]
-constants_xz = [1, 1, 1]
-PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)
-PIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1,
-            lim_min=0)  # A position of max 100 mm will give a velocity of 125 mm/s
-
-# Main code that loops, might not be relevant since this is just the PID controller being used to move
-while 1:
-    if SP[1] > 0:  # SP is the desired point, so the camera input here basically. If y > 0, run code
-        VP = dryve.getPosition()  # Needs to be converted to UDP (Read)
-        velocity = PIDy.update(feedback=VP, target=SP[1])
-        velocity = int(round(velocity))
-        dryve.targetVelocity(velocity)  # Needs to be converted to UDP (Write)
-
-        if velocity < 1:
-            dryve.targetVelocity(0)  # Needs to be converted to UDP (Write)
-
-    if SP[0] > 0:
-        VP = 1  # Get position  + # Needs to be converted to UDP (Read)
-        position_x = PIDxz.update(feedback=VP, target=SP[0])
-        position_x = int(round(position_x))
-        # DO THE THING :)   + # Needs to be converted to UDP (Write)
-
-        if position < 1:
-            pass  # Needs to be converted to be UDP (Write)
-
-    if SP[3] > 0:
-        VP = 1  # Get position  + # Needs to be converted to UDP (Read)
-        position_z = PIDxz.update(feedback=VP, target=SP[3])
-        position_z = int(round(position_z))
-        # DO THE THING :)   + # Needs to be converted to UDP (Write)
-
-        if position < 1:
-            pass  # Set position to the current  + # Needs to be converted to UDP (Write)
