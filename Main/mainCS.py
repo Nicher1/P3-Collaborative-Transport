@@ -107,16 +107,16 @@ class cameraData:
 
 cameraData = cameraData()
 
-T_camera_EE = np.array([[1, 0, 0, -32],
-                           [0, 1, 0, 48],
-                           [0, 0, 1, -175],
+T_EE_camera = np.array([[1, 0, 0, 32],
+                           [0, 1, 0, -48],
+                           [0, 0, 1, 175],
                            [0, 0, 0, 1]])
 
-T_towel_EE = np.array([0, 21, -80])
+T_EE_towel = np.array([0, -21, 80])
 
-T_EE_robotbase = np.array([[0, 1, 0, 0],
-                           [0, 0, -1, 0],
-                           [-1, 0, 0, 0],
+T_robotbase_EE = np.array([[0, 0, -1, 0],
+                           [1, 0, 0, 0],
+                           [0, -1, 0, 0],
                            [0, 0, 0, 1]])
 
 T_global_robotbase = np.array([[1, 0, 0, 0],
@@ -127,25 +127,33 @@ T_global_robotbase = np.array([[1, 0, 0, 0],
 while True:
     # Step 1: Update all variables (attain current position, and human position from camera)
 
-    T_EE_robotbase[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)
-    T_EE_robotbase[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)
-    T_EE_robotbase[2, 3] = communicateUDP(ur10, 1, 2, nr_of_following_messages=0)
+    T_robotbase_EE[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)  # Update UR10 position
+    T_robotbase_EE[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)
+    T_robotbase_EE[2, 3] = communicateUDP(ur10, 1, 2, nr_of_following_messages=0)
 
-    T_robotbase_global[1, 3] = communicateUDP(rail, 11, 1, nr_of_following_messages=0)
+    T_global_robotbase[1, 3] = communicateUDP(rail, 11, 1, nr_of_following_messages=0)  # Update rail position
 
     recieveAndUnpack(camera)  # Collect the latest information from the camera, and store it in cameraData
-    humanPosGlobal = np.dotP(T)
+    humanPosGlobal = np.matmul(np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_camera),cameraData.currentPos)
 
-    #towelPosGlobal = T_towel_EE*T_EE_robotbase*T_robotbase_global  # The current position of our towel/end effector in global frame.
+    towelPosGlobal = np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_towel) # The current position of our towel/end effector in global frame.
+
+    print(f"humanPosGlobal: {humanPosGlobal}")
 
     # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
+    goalPos = humanPosGlobal + np.array([1000, 0, 0])  # GoalPos is given by a translation from the humanPos, which is our restrictions.
 
-    #goalPos = humanPosGlobal + np.array([1000, 0, 0])  #GoalPos is given by a translation form the humanPos, which is our restrictions.
-    #error = goalPos - towelPosGlobal
+    if cameraData.state == True:
+        velocity_y = PIDy.update(feedback=towelPosGlobal[1], target=goalPos[1])
+        velocity_y = int(round(velocity_y))
 
-    pid = PID(1, 0.002, 0.01, -300, 300)
+        position_x = PIDx.update(feedback=towelPosGlobal[0], target=goalPos[0])
+        position_x = int(round(position_x))
 
-    # Step 3: Push new information to rail and UR10.
-    # communicateUDP(rail, 12, rw=1, information=PIDoutput[1])  # Target velocity for rail
-    # communicateUDP(ur10, 1, 3, rw=1, information=PIDoutput[0], nr_of_following_messages=1)
-    # communicateUDP(ur10, 1, 4, rw=1, information=PIDoutput[2], nr_of_following_messages=0)
+        position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
+        position_z = int(round(velocity_y))
+
+        # Step 3: Push new information to rail and UR10.
+        communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
+        communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1)
+        communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0)
