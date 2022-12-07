@@ -201,11 +201,11 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means, show):
     ImageCopy = Image.copy()
-    ImageCrop = ImageCopy[means[0]-100:means[0], means[1]-50:means[1]+50]
-    ImageGrey = cv.cvtColor(ImageCrop, cv.COLOR_BGR2GRAY)
+    ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
+    ImageCrop = ImageGrey[means[0]-100:means[0], means[1]-50:means[1]+50]
     
     if show == True:
-        cv.imshow("material checker", ImageGrey)
+        cv.imshow("material checker", ImageCrop)
         cv.waitKey(1)       
     
     '''
@@ -217,7 +217,7 @@ def chckMaterial(Image, means, show):
                 ImageCopy[y, x] = 255
     '''
     if show == True:
-        cv.imshow("material checker", ImageCopy)
+        cv.imshow("material checker", ImageCrop)
         cv.waitKey(1)       
 
     return True 
