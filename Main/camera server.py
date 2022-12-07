@@ -7,8 +7,7 @@ import mediapipe as mp
 from helpers import colorize
 import pyk4a as pyk
 import socket
-from threading import Thread
-import keyboard as kb
+import time
 
 # Addresses and ports
 localAddress = "127.0.0.1"
@@ -43,8 +42,8 @@ printXYZ = False
 printWristDist = False
 
 # Depth image settings
-drawCirclesDEPTH = False
-showImageDEPTH = False
+drawCirclesDEPTH = True
+showImageDEPTH = True
 
 # RGB image settings
 drawCirclesRGB = False
@@ -202,6 +201,37 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     # Send data
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
+# security function checking whether the operator is handling the material or not
+def chckMaterial(Image, means):
+    try:
+        ImageCopy = Image.copy()
+        ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
+        ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
+        value = 0
+        for y in range(ImageCrop.shape[0]):
+            for x in range(ImageCrop.shape[1]):
+                if ImageCrop[y, x] <= 100:
+                    ImageCrop[y, x] = 0
+                else:
+                    ImageCrop[y, x] = 255
+
+        ImageBlur = cv.blur(ImageCrop, (20, 20))
+        
+        for y in range(ImageBlur.shape[0]):
+            for x in range(ImageBlur.shape[1]):
+                    value = value+ImageBlur[y,x]
+
+        valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
+
+        if valuepercent < 0.85: state.state = 0
+
+        if showImageMATERIAL == True:
+            cv.imshow("material checker", ImageBlur)
+            cv.waitKey(1)
+    
+    except:
+        state.state = 0
+
 # primary function containing all camera code
 def cameraUI():
     k4aCapture = k4a.get_capture()
@@ -247,6 +277,8 @@ def cameraUI():
 
             state.state = 1
             
+            chckMaterial(capCol, [meany, meanx])
+
         else:
             state.state = 0
 
@@ -265,6 +297,11 @@ def detectHands(Input_img_col, Input_img_depth):
     fingertips = np.zeros((5, 2))
 
     Center = [int(h / 2), int(w / 2)]
+
+    OuterBox = [int(np.rint(Center[0] * (1 - OuterThresh))), int(np.rint(Center[1] * (1 - OuterThresh))),
+                int(np.rint(Center[0] * (1 + OuterThresh))), int(np.rint(Center[1] * (1 + OuterThresh)))]
+    InnerBox = [int(np.rint(Center[0] * (1 - InnerThresh))), int(np.rint(Center[1] * (1 - InnerThresh))),
+                int(np.rint(Center[0] * (1 + InnerThresh))), int(np.rint(Center[1] * (1 + InnerThresh)))]
 
     col = 0
     if results.multi_hand_landmarks:
@@ -338,42 +375,6 @@ def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi / 2), FOVy=1.03, xwidth=1280, yheig
     pos = [x, y, z]
     return pos
 
-# security function checking whether the operator is handling the material or not
-def chckMaterial():
-    while True:
-        global means
-        global capCol
-
-        try:
-            ImageCopy = capCol.copy()
-            ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
-            ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
-            value = 0
-            for y in range(ImageCrop.shape[0]):
-                for x in range(ImageCrop.shape[1]):
-                    if ImageCrop[y, x] <= 100:
-                        ImageCrop[y, x] = 0
-                    else:
-                        ImageCrop[y, x] = 255
-
-            ImageBlur = cv.blur(ImageCrop, (20, 20))
-            
-            for y in range(ImageBlur.shape[0]):
-                for x in range(ImageBlur.shape[1]):
-                        value = value+ImageBlur[y,x]
-
-            valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
-
-            if valuepercent < 0.85: state.state = 0
-
-            if showImageMATERIAL == True:
-                cv.imshow("material checker", ImageBlur)
-                cv.waitKey(1)
-        
-        except:
-            state.state = 0
-        
-# main function loop
 def main():
     while True:
         try:
@@ -388,9 +389,6 @@ def main():
             communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
             communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
             communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
-        
+
 if __name__ == '__main__':
-    threadA = Thread(target = chckMaterial)
-    threadB = Thread(target = main)
-    threadA.start()
-    threadB.start()
+    main()
