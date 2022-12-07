@@ -150,8 +150,13 @@ while True:
         position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
         position_z = int(round(position_z))
 
+        #print(f"feedback_x: {towelPosGlobal[0]}, target_x: {goalPos[0]}, position_x: {position_x}")
+
         # Step 3: Push new information to rail and UR10.
         communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
         communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1) # Target position x for UR10
         communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0) # Target position z for UR10
         communicateUDP(ur10, 2, 0, rw=1) # Execute ur10
+
+    elif cameraData.state == False:
+        communicateUDP(rail, 12, rw=1, information=0)  # Target velocity for rail
