@@ -203,30 +203,37 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
-    ImageCopy = Image.copy()
-    ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
-    ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
-    value = 0
-    for y in range(ImageCrop.shape[0]):
-        for x in range(ImageCrop.shape[1]):
-            if ImageCrop[y, x] <= 100:
-                ImageCrop[y, x] = 0
-            else:
-                ImageCrop[y, x] = 255
+    if len(means) == 2:
+        ImageCopy = Image.copy()
+        ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
+        ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
+        value = 0
+        for y in range(ImageCrop.shape[0]):
+            for x in range(ImageCrop.shape[1]):
+                if ImageCrop[y, x] <= 100:
+                    ImageCrop[y, x] = 0
+                else:
+                    ImageCrop[y, x] = 255
 
-    ImageBlur = cv.blur(ImageCrop, (20, 20))
+        ImageBlur = cv.blur(ImageCrop, (20, 20))
+        
+        for y in range(ImageBlur.shape[0]):
+            for x in range(ImageBlur.shape[1]):
+                    value = value+ImageBlur[y,x]
+
+        valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
+
+        if valuepercent < 0.85: state.state = 0
+
+        if showImageMATERIAL == True:
+            cv.imshow("material checker", ImageBlur)
+            cv.waitKey(1)
     
-    for y in range(ImageBlur.shape[0]):
-        for x in range(ImageBlur.shape[1]):
-                value = value+ImageBlur[y,x]
-
-    valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
-
-    if valuepercent < 0.85: state.state = 0
-
-    if showImageMATERIAL == True:
-        cv.imshow("material checker", ImageBlur)
-        cv.waitKey(1)   
+    elif len(means) != 2:
+        state.state = 0
+    
+    else:
+        print("Nonetype")
 
 
 # primary function containing all camera code

@@ -2,7 +2,27 @@ import socket
 import time
 import numpy as np
 from PIDController.just_PID import PID
+import keyboard as kb
+from subprocess import Popen
+'''
+while True:
+    iteration = 0
+    while True:
+        if iteration == 0:
+            BAT_rail = Popen("rail server.bat", cwd=r"C:\\Users\probo\\OneDrive\Desktop\\P3-Collaborative-Transport\\Main")
+            time.sleep(6)
+            BAT_UR = Popen("UR10 server.bat", cwd=r"C:\\Users\probo\\OneDrive\Desktop\\P3-Collaborative-Transport\\Main")
+            time.sleep(6)
+            BAT_camera = Popen("Camera server.bat", cwd=r"C:\\Users\probo\\OneDrive\Desktop\\P3-Collaborative-Transport\\Main")
+            print("To proceed press 'r'")
+        if kb.is_pressed("r"):
+            print("You pressed 'r'")
+            break
+        
+        iteration += 1
 
+    while True:
+'''
 # Client code -------------------------------------------------------
 
 # Addresses and ports
@@ -107,21 +127,21 @@ class cameraData:
 cameraData = cameraData()
 
 T_EE_camera = np.array([[1, 0, 0, 32],
-                           [0, 1, 0, -48],
-                           [0, 0, 1, 175],
-                           [0, 0, 0, 1]])
+                        [0, 1, 0, -48],
+                        [0, 0, 1, 175],
+                        [0, 0, 0, 1]])
 
 T_EE_towel = np.array([0, -21, 80, 1])
 
 T_robotbase_EE = np.array([[0, 0, -1, 0],
-                           [1, 0, 0, 0],
-                           [0, -1, 0, 0],
-                           [0, 0, 0, 1]])
+                        [1, 0, 0, 0],
+                        [0, -1, 0, 0],
+                        [0, 0, 0, 1]])
 
 T_global_robotbase = np.array([[1, 0, 0, 0],
-                                  [0, 1, 0, 0],
-                                  [0, 0, 1, 0],
-                                  [0, 0, 0, 1]])
+                                [0, 1, 0, 0],
+                                [0, 0, 1, 0],
+                                [0, 0, 0, 1]])
 
 while True:
     # Step 1: Update all variables (attain current position, and human position from camera)
@@ -150,7 +170,7 @@ while True:
         position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
         position_z = int(round(position_z))
 
-        #print(f"feedback_x: {towelPosGlobal[0]}, target_x: {goalPos[0]}, position_x: {position_x}")
+        # print(f"feedback_x: {towelPosGlobal[0]}, target_x: {goalPos[0]}, position_x: {position_x}")
 
         # Step 3: Push new information to rail and UR10.
         communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
