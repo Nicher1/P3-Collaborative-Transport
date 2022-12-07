@@ -218,7 +218,8 @@ def cameraUI():
             cv.waitKey(1)
 
         if showImageDEPTH == True:
-            cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
+            capTransDepth = colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV)
+            cv.imshow("transformed col to depth persceptive", capTransDepth)
             cv.waitKey(1)
 
         if np.any(unpackPackage) != 0:
@@ -240,9 +241,11 @@ def cameraUI():
 
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
-            if vect[0] >= 100 or vect[0] <= -100 or vect[1] >= 50 or vect[1] <= -50:
-                    state.state = 0
-            else:
+            if state.state == 1:
+                if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 50 and vect[1] >= -50:
+                    state.state = 0                
+                
+            if vect[0] > 300 or vect[0] < -300 or vect[1] > 200 or vect[1] < -200:
                 state.state = 1
 
 
