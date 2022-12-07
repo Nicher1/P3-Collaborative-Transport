@@ -272,14 +272,17 @@ def cameraUI():
 
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
+            '''
             if state.state == 1:
                 if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 25 and vect[1] >= -25:
                     state.state = 0                
                 
             if vect[0] > 200 or vect[0] < -200 or vect[1] > 50 or vect[1] < -50:
                 state.state = 1
+            '''
+            state.state = 1
 
-            chckMaterial(capCol, [meany, meanx], True)
+            chckMaterial(capCol, [meany, meanx])
 
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
