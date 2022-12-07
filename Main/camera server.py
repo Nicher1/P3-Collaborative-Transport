@@ -49,6 +49,9 @@ showImageDEPTH = True
 drawCirclesRGB = False
 showImageRGB = False
 
+# material image settings
+showImageMATERIAL = False
+
 #####################################################################
 ###########################     SETUP     ###########################
 #####################################################################
@@ -199,37 +202,32 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
 # security function checking whether the operator is handling the material or not
-def chckMaterial(Image, means, show):
+def chckMaterial(Image, means):
     ImageCopy = Image.copy()
     ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
-    ImageCrop = ImageGrey[means[0]-100:means[0], means[1]-50:means[1]+50]
-    
-    if show == True:
-        cv.imshow("material checker", ImageCrop)
-        cv.waitKey(1)       
-    
-    '''
-    for y, row in enumerate(ImageCopy.shape[0]):
-        for x, pixel in enumerate(ImageCopy.shape[1]):
-            if ImageCopy[y, x] <= 100:
-                ImageCopy[y, x] = 0
+    ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
+    value = 0
+    for y in range(ImageCrop.shape[0]):
+        for x in range(ImageCrop.shape[1]):
+            if ImageCrop[y, x] <= 100:
+                ImageCrop[y, x] = 0
             else:
-                ImageCopy[y, x] = 255
-    '''
-    if show == True:
-        cv.imshow("material checker", ImageCrop)
-        cv.waitKey(1)       
+                ImageCrop[y, x] = 255
 
-    return True 
+    ImageBlur = cv.blur(ImageCrop, (20, 20))
+    
+    for y in range(ImageBlur.shape[0]):
+        for x in range(ImageBlur.shape[1]):
+                value = value+ImageBlur[y,x]
 
-    '''
-    for y, row in enumerate(ImageCopy[int(cartesian_coords[1]/2):int(cartesian_coords[1]/2)+100, :]):
-        for x, pixel in enumerate(ImageCopy[:, int(cartesian_coords[0]/2)-50:int(cartesian_coords[0]/2)+50]):
-            if ImageCopy[y+int(cartesian_coords[1]/cartesian_coords[1]), x+int(cartesian_coords[0]/cartesian_coords[0])] <= 100:
-                ImageCopy[y+int(cartesian_coords[1]/cartesian_coords[1]), x+int(cartesian_coords[0]/cartesian_coords[0])] = 0
-            else:
-                ImageCopy[y+int(cartesian_coords[1]/2), x+int(cartesian_coords[0]/2)] = 255
-    '''    
+    valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
+
+    if valuepercent < 0.85: state.state = 0
+
+    if showImageMATERIAL == True:
+        cv.imshow("material checker", ImageBlur)
+        cv.waitKey(1)   
+
 
 # primary function containing all camera code
 def cameraUI():
@@ -281,10 +279,7 @@ def cameraUI():
             if vect[0] > 200 or vect[0] < -200 or vect[1] > 50 or vect[1] < -50:
                 state.state = 1
 
-            materialPresent = chckMaterial(capCol, [meany, meanx], True)
-
-            if materialPresent == False:
-                state.state = 0
+            chckMaterial(capCol, [meany, meanx], True)
 
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
