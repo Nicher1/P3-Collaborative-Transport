@@ -240,14 +240,8 @@ def cameraUI():
 
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
-            if meanx > Center[1] + (1 - OuterThresh) and meanx < Center[1] + (1 + OuterThresh) and meany > Center[0] - (
-                    1 + OuterThresh) and meany < Center[0] + (1 + OuterThresh):
-                if meanx > Center[1] + (1 - InnerThresh) and meanx < Center[1] + (1 + InnerThresh) and meany > Center[
-                    0] - (1 + InnerThresh) and meany < Center[0] + (1 + InnerThresh):
+            if vect[0] >= 100 or vect[0] <= -100 or vect[1] >= 50 or vect[1] <= -50:
                     state.state = 0
-                else:
-                    state.state = 0
-
             else:
                 state.state = 1
 
