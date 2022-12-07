@@ -42,8 +42,8 @@ printXYZ = False
 printWristDist = False
 
 # Depth image settings
-drawCirclesDEPTH = True
-showImageDEPTH = True
+drawCirclesDEPTH = False
+showImageDEPTH = False
 
 # RGB image settings
 drawCirclesRGB = False
@@ -292,7 +292,6 @@ def detectHands(Input_img_col, Input_img_depth):
     # print(results.multi_hand_landmarks)
 
     # Unpacking Input_img shape pro
-    hdep, wdep = Input_img_depth.shape
     h, w, c = Input_img_col.shape
     fingertips = np.zeros((5, 2))
 
