@@ -9,7 +9,7 @@ from PIDController.just_PID import PID
 localAddress = "127.0.0.1"
 buffersize = 9
 
-# Main code that runs once, abselutly has to be there or there is no PID controller
+# Main code that runs once, absolutely has to be there or there is no PID controller
 constants_y = [1, 0.002, 0.01]
 constants_xz = [1, 0.002, 0.04]
 PIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=-300)
@@ -137,11 +137,8 @@ while True:
 
     towelPosGlobal = np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_towel) # The current position of our towel/end effector in global frame.
 
-    #print(f"humanPosGlobal: {humanPosGlobal}")
-
     # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
     goalPos = humanPosGlobal + np.array([1000, 0, 0, 0])  # GoalPos is given by a translation from the humanPos, which is our restrictions.
-    #print(f"goalPos: {goalPos}")
 
     if cameraData.state == True:
         velocity_y = PIDy.update(feedback=towelPosGlobal[1], target=goalPos[1])
@@ -153,13 +150,8 @@ while True:
         position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
         position_z = int(round(position_z))
 
-        print(f"feedback: {towelPosGlobal[2]} target: {goalPos[2]}")
-        print(f"position_x: {position_z}")
-
-        #print(f"Data sent out: V = {velocity_y}, posX = {position_x}, posZ = {position_z}")
-
         # Step 3: Push new information to rail and UR10.
         communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
-        communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1)
-        communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0)
+        communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1) # Target position x for UR10
+        communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0) # Target position z for UR10
         communicateUDP(ur10, 2, 0, rw=1) # Execute ur10

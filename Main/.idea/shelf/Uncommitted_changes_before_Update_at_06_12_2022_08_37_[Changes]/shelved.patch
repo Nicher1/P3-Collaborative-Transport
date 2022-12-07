@@ -1,0 +1,48 @@
+Index: mainCS.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import socket\r\nimport time\r\nimport numpy as np\r\nimport sys\r\nsys.path_insert(0, \"..\")\r\nfrom PIDConroller.URScript.just_PID import PID\r\n\r\n# Client code -------------------------------------------------------\r\n\r\n# Addresses and ports\r\nlocalAddress = \"127.0.0.1\"\r\nbuffersize = 9\r\n\r\n# Main code that runs once, abselutly has to be there or there is no PID controller\r\nconstants_y = [1, 0.002, 0.01]\r\nconstants_xz = [1, 1, 1]\r\nPIDy = PID(Kp=constants_y[0], Ki=constants_y[1], Kd=constants_y[2], lim_max=300, lim_min=0)\r\nPIDxz = PID(Kp=constants_xz[0], Ki=constants_xz[1], Kd=constants_xz[2], lim_max=0.1,\r\n            lim_min=0)  # A position of max 100 mm will give a velocity of 125 mm/s\r\n\r\nclass subsys:\r\n    def __init__(self, CLIENT_PORT, SERVER_PORT):\r\n        self.CLIENT_PORT = CLIENT_PORT\r\n        self.SERVER_PORT = SERVER_PORT\r\n        self.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)\r\n        self.s.bind((localAddress, self.CLIENT_PORT))\r\n\r\nur10 = subsys(20001, 20002)\r\nrail = subsys(20003, 20004)\r\ncamera = subsys(20005, 20006)\r\n\r\ndef extractBytes(integer):\r\n    firstArray = divmod(integer, 0x100)\r\n    secondArray = divmod(firstArray[0], 0x100)\r\n    thirdArray = divmod(secondArray[0], 0x100)\r\n    output = [thirdArray[0], thirdArray[1], secondArray[1], firstArray[1]]\r\n    return output\r\n\r\ndef combineBytes(sign, bytes):\r\n    output = bytes[0]*256**3 + bytes[1]*256**2 + bytes[2]*256 + bytes[3]\r\n    if sign == 1:\r\n        output = output*(-1)\r\n    return output\r\n\r\ndef communicateUDP(sub_system, object, subindex=0, rw=0, information=0, nr_of_following_messages=0):\r\n\r\n    # Format data\r\n    sign = 0\r\n    if information < 0:\r\n        sign = 1\r\n        information = abs(information)\r\n    information = extractBytes(information)\r\n    package = [object, subindex, rw, sign, information[0], information[1], information[2], information[3], nr_of_following_messages]\r\n    package_array = bytes(package)\r\n\r\n    # Send data\r\n    sub_system.s.sendto(package_array, (localAddress, sub_system.SERVER_PORT))\r\n\r\n    # Receive data\r\n    if rw == 0:\r\n        recieved = sub_system.s.recvfrom(buffersize)\r\n        recieved = list(recieved[0])\r\n        recieved = combineBytes(recieved[3], recieved[4:8])\r\n        return recieved\r\n\r\ndef recieveAndUnpack(sub_system):\r\n    data = sub_system.s.recvfrom(buffersize)\r\n    data = list(data[0])\r\n    object = data[0]\r\n    subindex = data[1]\r\n    rw = data[2]\r\n    sign = data[3]\r\n    information = combineBytes(sign, data[4:8])\r\n    followingMessages = data[8]\r\n\r\n    interpretUDPCommand(object, subindex, rw, information)\r\n\r\n    if followingMessages > 0:\r\n        recieveAndUnpack(sub_system)\r\n\r\n# Function which links the information to the correct object and subindex.\r\ndef interpretUDPCommand(object, subindex, rw, information):\r\n    if rw == 0:\r\n        readData = 0\r\n        return readData\r\n    elif rw == 1:\r\n        if object == 21:\r\n            if subindex == 0:\r\n                cameraData.currentPos[0] = information\r\n            if subindex == 1:\r\n                cameraData.currentPos[1] = information\r\n            if subindex == 2:\r\n                cameraData.currentPos[2] = information\r\n        if object == 22:\r\n            if subindex == 0:\r\n                cameraData.state = information\r\n\r\n    else:\r\n        print(\"Error - Invalid read/write command\")\r\n\r\n# End Client code ---------------------------------------------------------------\r\n\r\nclass cameraData:\r\n    currentPos = [0, 0, 0]\r\n    state = False\r\n\r\ncameraData = cameraData()\r\n\r\nT_camera_EE = np.array([[1, 0, 0, -32],\r\n                           [0, 1, 0, 48],\r\n                           [0, 0, 1, -175],\r\n                           [0, 0, 0, 1]])\r\n\r\nT_towel_EE = np.array([0, 21, -80])\r\n\r\nT_EE_robotbase = np.array([[0, 1, 0, 0],\r\n                           [0, 0, -1, 0],\r\n                           [-1, 0, 0, 0],\r\n                           [0, 0, 0, 1]])\r\n\r\nT_global_robotbase = np.array([[1, 0, 0, 0],\r\n                                  [0, 1, 0, 0],\r\n                                  [0, 0, 1, 0],\r\n                                  [0, 0, 0, 1]])\r\n\r\nwhile True:\r\n    # Step 1: Update all variables (attain current position, and human position from camera)\r\n\r\n    T_EE_robotbase[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)\r\n    T_EE_robotbase[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)\r\n    T_EE_robotbase[2, 3] = communicateUDP(ur10, 1, 2, nr_of_following_messages=0)\r\n\r\n    T_robotbase_global[1, 3] = communicateUDP(rail, 11, 1, nr_of_following_messages=0)\r\n\r\n    recieveAndUnpack(camera)  # Collect the latest information from the camera, and store it in cameraData\r\n    humanPosGlobal = np.dotP(T)\r\n\r\n    #towelPosGlobal = T_towel_EE*T_EE_robotbase*T_robotbase_global  # The current position of our towel/end effector in global frame.\r\n\r\n    # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.\r\n\r\n    #goalPos = humanPosGlobal + np.array([1000, 0, 0])  #GoalPos is given by a translation form the humanPos, which is our restrictions.\r\n    #error = goalPos - towelPosGlobal\r\n\r\n    pid = PID(1, 0.002, 0.01, -300, 300)\r\n\r\n    # Step 3: Push new information to rail and UR10.\r\n    # communicateUDP(rail, 12, rw=1, information=PIDoutput[1])  # Target velocity for rail\r\n    # communicateUDP(ur10, 1, 3, rw=1, information=PIDoutput[0], nr_of_following_messages=1)\r\n    # communicateUDP(ur10, 1, 4, rw=1, information=PIDoutput[2], nr_of_following_messages=0)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mainCS.py b/mainCS.py
+--- a/mainCS.py	(revision 160cc608adcf5f93228d0aff5da9849cc7c5a706)
++++ b/mainCS.py	(date 1670312274678)
+@@ -106,16 +106,16 @@
+ 
+ cameraData = cameraData()
+ 
+-T_camera_EE = np.array([[1, 0, 0, -32],
+-                           [0, 1, 0, 48],
+-                           [0, 0, 1, -175],
++T_EE_camera = np.array([[1, 0, 0, 32],
++                           [0, 1, 0, -48],
++                           [0, 0, 1, 175],
+                            [0, 0, 0, 1]])
+ 
+-T_towel_EE = np.array([0, 21, -80])
++T_EE_towel = np.array([0, -21, 80])
+ 
+-T_EE_robotbase = np.array([[0, 1, 0, 0],
+-                           [0, 0, -1, 0],
+-                           [-1, 0, 0, 0],
++T_robotbase_EE = np.array([[0, 0, -1, 0],
++                           [1, 0, 0, 0],
++                           [0, -1, 0, 0],
+                            [0, 0, 0, 1]])
+ 
+ T_global_robotbase = np.array([[1, 0, 0, 0],
+@@ -133,9 +133,11 @@
+     T_robotbase_global[1, 3] = communicateUDP(rail, 11, 1, nr_of_following_messages=0)
+ 
+     recieveAndUnpack(camera)  # Collect the latest information from the camera, and store it in cameraData
+-    humanPosGlobal = np.dotP(T)
++    humanPosGlobal = np.matmul(np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_camera),cameraData.currentPos)
++
++    towelPosGlobal = np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_towel) # The current position of our towel/end effector in global frame.
+ 
+-    #towelPosGlobal = T_towel_EE*T_EE_robotbase*T_robotbase_global  # The current position of our towel/end effector in global frame.
++
+ 
+     # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
+ 
