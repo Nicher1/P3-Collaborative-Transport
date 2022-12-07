@@ -49,6 +49,9 @@ showImageDEPTH = True
 drawCirclesRGB = False
 showImageRGB = False
 
+# material image settings
+showImageMATERIAL = False
+
 #####################################################################
 ###########################     SETUP     ###########################
 #####################################################################
@@ -198,7 +201,35 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     # Send data
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
-# primary function containing all main code
+# security function checking whether the operator is handling the material or not
+def chckMaterial(Image, means):
+    ImageCopy = Image.copy()
+    ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
+    ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
+    value = 0
+    for y in range(ImageCrop.shape[0]):
+        for x in range(ImageCrop.shape[1]):
+            if ImageCrop[y, x] <= 100:
+                ImageCrop[y, x] = 0
+            else:
+                ImageCrop[y, x] = 255
+
+    ImageBlur = cv.blur(ImageCrop, (20, 20))
+    
+    for y in range(ImageBlur.shape[0]):
+        for x in range(ImageBlur.shape[1]):
+                value = value+ImageBlur[y,x]
+
+    valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
+
+    if valuepercent < 0.85: state.state = 0
+
+    if showImageMATERIAL == True:
+        cv.imshow("material checker", ImageBlur)
+        cv.waitKey(1)   
+
+
+# primary function containing all camera code
 def cameraUI():
     k4aCapture = k4a.get_capture()
     if np.any(k4aCapture.color):
@@ -218,7 +249,8 @@ def cameraUI():
             cv.waitKey(1)
 
         if showImageDEPTH == True:
-            cv.imshow("transformed col to depth persceptive", colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV))
+            capTransDepth = colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV)
+            cv.imshow("transformed col to depth persceptive", capTransDepth)
             cv.waitKey(1)
 
         if np.any(unpackPackage) != 0:
@@ -240,16 +272,14 @@ def cameraUI():
 
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
-            if meanx > Center[1] + (1 - OuterThresh) and meanx < Center[1] + (1 + OuterThresh) and meany > Center[0] - (
-                    1 + OuterThresh) and meany < Center[0] + (1 + OuterThresh):
-                if meanx > Center[1] + (1 - InnerThresh) and meanx < Center[1] + (1 + InnerThresh) and meany > Center[
-                    0] - (1 + InnerThresh) and meany < Center[0] + (1 + InnerThresh):
-                    state.state = 0
-                else:
-                    state.state = 0
-
-            else:
+            if state.state == 1:
+                if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 25 and vect[1] >= -25:
+                    state.state = 0                
+                
+            if vect[0] > 200 or vect[0] < -200 or vect[1] > 50 or vect[1] < -50:
                 state.state = 1
+
+            chckMaterial(capCol, [meany, meanx], True)
 
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
