@@ -198,7 +198,40 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     # Send data
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
-# primary function containing all main code
+# security function checking whether the operator is handling the material or not
+def chckMaterial(Image, means, show):
+    ImageCopy = Image.copy()
+    ImageCrop = ImageCopy[means[0]:means[0]-100, means[1]-50:means[1]+50]
+    ImageGrey = cv.cvtColor(ImageCrop, cv.COLOR_BGR2GRAY)
+    
+    if show == True:
+        cv.imshow("material checker", ImageGrey)
+        cv.waitKey(1)       
+    
+    '''
+    for y, row in enumerate(ImageCopy.shape[0]):
+        for x, pixel in enumerate(ImageCopy.shape[1]):
+            if ImageCopy[y, x] <= 100:
+                ImageCopy[y, x] = 0
+            else:
+                ImageCopy[y, x] = 255
+    '''
+    if show == True:
+        cv.imshow("material checker", ImageCopy)
+        cv.waitKey(1)       
+
+    return True 
+
+    '''
+    for y, row in enumerate(ImageCopy[int(cartesian_coords[1]/2):int(cartesian_coords[1]/2)+100, :]):
+        for x, pixel in enumerate(ImageCopy[:, int(cartesian_coords[0]/2)-50:int(cartesian_coords[0]/2)+50]):
+            if ImageCopy[y+int(cartesian_coords[1]/cartesian_coords[1]), x+int(cartesian_coords[0]/cartesian_coords[0])] <= 100:
+                ImageCopy[y+int(cartesian_coords[1]/cartesian_coords[1]), x+int(cartesian_coords[0]/cartesian_coords[0])] = 0
+            else:
+                ImageCopy[y+int(cartesian_coords[1]/2), x+int(cartesian_coords[0]/2)] = 255
+    '''    
+
+# primary function containing all camera code
 def cameraUI():
     k4aCapture = k4a.get_capture()
     if np.any(k4aCapture.color):
@@ -242,11 +275,16 @@ def cameraUI():
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
             if state.state == 1:
-                if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 50 and vect[1] >= -50:
+                if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 25 and vect[1] >= -25:
                     state.state = 0                
                 
-            if vect[0] > 300 or vect[0] < -300 or vect[1] > 200 or vect[1] < -200:
+            if vect[0] > 200 or vect[0] < -200 or vect[1] > 50 or vect[1] < -50:
                 state.state = 1
+
+            materialPresent = chckMaterial(capCol, [meany, meanx], True)
+
+            if materialPresent == False:
+                state.state = 0
 
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
