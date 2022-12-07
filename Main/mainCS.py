@@ -15,9 +15,9 @@ while True:
             time.sleep(5)
             BAT_camera = Popen("Camera server.bat")
             time.sleep(5)
-            print("To proceed press 'r'")
+            print("To commence robot operation, press 'r'")
         if kb.is_pressed("r"):
-            print("You pressed 'r'")
+            print("**ROBOT OPERATION COMMENCING**")
             break
         iteration += 1
 
@@ -178,6 +178,8 @@ while True:
                 communicateUDP(ur10, 2, 0, rw=1) # Execute ur10
 
             elif cameraData.state == False:
+                # When cameraData.state is false, then the system makes the robot stay in its latest pose until two hands are present again
+
                 communicateUDP(rail, 12, rw=1, information=0)  # Target velocity for rail
                 velocity_y = PIDy.update(feedback=towelPosGlobal[1], target=towelPosGlobal[1])
                 velocity_y = int(round(velocity_y))
