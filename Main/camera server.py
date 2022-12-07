@@ -203,7 +203,7 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
-    if len(means) == 2:
+    try:
         ImageCopy = Image.copy()
         ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
         ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
@@ -229,12 +229,8 @@ def chckMaterial(Image, means):
             cv.imshow("material checker", ImageBlur)
             cv.waitKey(1)
     
-    elif len(means) != 2:
+    except:
         state.state = 0
-    
-    else:
-        print("Nonetype")
-
 
 # primary function containing all camera code
 def cameraUI():
@@ -279,18 +275,12 @@ def cameraUI():
 
             pos.position = [int(vect[0]), int(vect[1]), int(vect[2])]
 
-            '''
-            if state.state == 1:
-                if vect[0] <= 100 and vect[0] >= -100 and vect[1] <= 25 and vect[1] >= -25:
-                    state.state = 0                
-                
-            if vect[0] > 200 or vect[0] < -200 or vect[1] > 50 or vect[1] < -50:
-                state.state = 1
-            '''
             state.state = 1
-
+            
             chckMaterial(capCol, [meany, meanx])
 
+        else:
+            state.state = 0
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
@@ -347,6 +337,8 @@ def detectHands(Input_img_col, Input_img_depth):
             returnPackage = [Center, centerDiff, meany, meanx, centerDiffLenght]
 
         if len(handPos) == 2:
+            state.state = 0
+
             if drawCirclesDEPTH == True:
                 cv.circle(imgDepth, (handPos[1], handPos[0]), 4,
                           (int(255 / 20) * (col * 4), 255 - int(255 / 20) * (col * 5), 255), cv.FILLED)
@@ -385,11 +377,18 @@ def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi / 2), FOVy=1.03, xwidth=1280, yheig
 
 def main():
     while True:
-        cameraUI()
-        communicateUDPcamera(21, 0, 1, pos.position[0], nr_of_following_messages=3)
-        communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
-        communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
-        communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
+        try:
+            cameraUI()
+            communicateUDPcamera(21, 0, 1, pos.position[0], nr_of_following_messages=3)
+            communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
+            communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
+            communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
+        except:
+            state.state = 0
+            communicateUDPcamera(21, 0, 1, pos.position[0], nr_of_following_messages=3)
+            communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
+            communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
+            communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
 
 if __name__ == '__main__':
     main()
