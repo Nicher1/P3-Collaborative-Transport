@@ -38,7 +38,7 @@ class currentState:
 #####################################################################
 
 # Print settings
-printXYZ = False
+printXYZ = True
 printWristDist = False
 
 # Depth image settings
@@ -46,8 +46,8 @@ drawCirclesDEPTH = False
 showImageDEPTH = False
 
 # RGB image settings
-drawCirclesRGB = False
-showImageRGB = False
+drawCirclesRGB = True
+showImageRGB = True
 
 # material image settings
 showImageMATERIAL = False
@@ -202,7 +202,7 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
 # security function checking whether the operator is handling the material or not
-def chckMaterial(Image, means):
+def chckMaterial(Image, means, coords):
     try:
         ImageCopy = Image.copy()
         ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
@@ -223,7 +223,8 @@ def chckMaterial(Image, means):
 
         valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
 
-        if valuepercent < 0.85: state.state = 0
+        if coords[2] >= 710 and coords[2] <= 1120 and valuepercent >= 0.85: state.state = 1
+        else: state.state = 0
 
         if showImageMATERIAL == True:
             cv.imshow("material checker", ImageBlur)
@@ -256,7 +257,7 @@ def cameraUI():
             cv.imshow("transformed col to depth persceptive", capTransDepth)
             cv.waitKey(1)
 
-        if np.any(unpackPackage) != 0:
+        if any(unpackPackage) != 0:
             Center = unpackPackage[0]
             centerDiff = unpackPackage[1]
             meany = unpackPackage[2]
@@ -266,7 +267,7 @@ def cameraUI():
             # print(length)
             if printXYZ == True:
                 global iteration
-                iteration = iteration + 1
+                iteration += 1
                 if iteration % 10 == 0:
                     vect = pixelDist2EucDist(meanx, meany, length)
                     print(vect)
@@ -277,10 +278,12 @@ def cameraUI():
 
             state.state = 1
             
-            chckMaterial(capCol, [meany, meanx])
+            chckMaterial(capCol, [meany, meanx], vect)
 
         else:
             state.state = 0
+
+       # print(state.state)
 
 # function for hand detection. Also included is processing of the wrists relation to eachother and the middlepoint in between the wrists positional error regarding that of the i
 def detectHands(Input_img_col, Input_img_depth):
@@ -313,7 +316,7 @@ def detectHands(Input_img_col, Input_img_depth):
                 # print(id,hand)
                 cx, cy = int(hand.x * w), int(hand.y * h)
 
-                if id in [10]:
+                if id in [10]: # This ID defines the point tracked on the hand
                     if printWristDist == True:
                         print("Dist wrist", col, ": ", imgDepth[cy, cx])
                     handPos.append(cy)
