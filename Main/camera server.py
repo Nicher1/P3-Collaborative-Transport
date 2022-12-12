@@ -204,13 +204,19 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
 def test6123(color_image):
     center = [int(color_image.shape[1]/2), int(color_image.shape[0]/2)]
 
-    bThresh = [200, 255]
-    gThresh = [200, 255]
-    rThresh = [200, 255]
+    bwIMG = color_image.copy()
+    bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
 
-    print(color_image[center[0], center[1]])
+   # bThresh = [200, 255]
+   # gThresh = [200, 255]
+   # rThresh = [200, 255]
 
-    if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
+    bwTRESH = [170, 255]
+
+    print(bwIMG[center[0], center[1]])
+
+    # if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
+    if bwIMG[center[0], center[1]] >= bwTRESH[0] and bwIMG[center[0], center[1]] <= bwTRESH[1]
         print("Whitin bounds")
     
     else:
