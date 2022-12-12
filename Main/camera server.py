@@ -202,10 +202,10 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
 def test6123(color_image):
-    center = [int(color_image.shape[1]/2), int(color_image.shape[0]/2)]
-
     bwIMG = color_image.copy()
     bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
+
+    center = [int(bwIMG.shape[1]/2), int(bwIMG.shape[0]/2)]
 
     with open('logger.txt', 'w') as f:
         f.write(str(f'\n {bwIMG[center[0], center[1]]}'))
