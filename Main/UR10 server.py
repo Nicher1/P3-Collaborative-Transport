@@ -61,7 +61,7 @@ class Robot:
 
     def getCurrentOrientation(self, coordinate):
         currentPose = self.robot.get_actual_tcp_pose()
-        return currentPose[coordinate]
+        return int(round(currentPose[coordinate]*1000))
 
 
 UR10 = Robot()
@@ -118,11 +118,11 @@ def interpretUDPCommand(object, subindex, rw, information):
                 readData = UR10.getCurrentTranMat(subindex)
         if object == 2:
             if subindex == 3:
-                readData = UR10.getCurrentOrientation(subindex)
+                readData = UR10.getCurrentOrientation(3)
             if subindex == 4:
-                readData = UR10.getCurrentOrientation(subindex)
+                readData = UR10.getCurrentOrientation(4)
             if subindex == 5:
-                readData = UR10.getCurrentOrientation(subindex)
+                readData = UR10.getCurrentOrientation(5)
         return readData
     elif rw == 1:
         if object == 1:

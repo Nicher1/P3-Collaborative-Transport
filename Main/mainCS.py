@@ -127,15 +127,16 @@ while True:
                                     [0, 1, 0, 0],
                                     [0, 0, 1, 0],
                                     [0, 0, 0, 1]])
-    orientation_data = open("test1.txt", "a")
+    orientation_data = open("orientationTest5.txt", "a")
     orientation_vec = [0, 0, 0]
 
     while True:
         # Step 1: Update all variables (attain current position, and human position from camera)
-        orientation_vec[0] = communicateUDP(ur10,2,3, nr_of_following_messages=5) #Read the orientation of the robot
+        orientation_vec[0] = communicateUDP(ur10, 2, 3, nr_of_following_messages=5) #Read the orientation of the robot
         orientation_vec[1] = communicateUDP(ur10, 2, 4, nr_of_following_messages=4)
         orientation_vec[2] = communicateUDP(ur10, 2, 5, nr_of_following_messages=3)
-        orientation_data.write(orientation_vec)
+
+        np.savetxt(orientation_data, orientation_vec)
 
         T_robotbase_EE[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)  # Update UR10 position
         T_robotbase_EE[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)
