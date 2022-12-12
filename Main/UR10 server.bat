@@ -1,1 +1,1 @@
-start python "UR10 server.py"
+start py "UR10 server.py"
