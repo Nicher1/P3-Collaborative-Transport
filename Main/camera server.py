@@ -207,20 +207,8 @@ def test6123(color_image):
     bwIMG = color_image.copy()
     bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
 
-   # bThresh = [200, 255]
-   # gThresh = [200, 255]
-   # rThresh = [200, 255]
-
-    bwTRESH = [170, 255]
-
-    print(bwIMG[center[0], center[1]])
-
-    # if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
-    if bwIMG[center[0], center[1]] >= bwTRESH[0] and bwIMG[center[0], center[1]] <= bwTRESH[1]:
-        print("Whitin bounds")
-    
-    else:
-        print("Out of bounds")
+    with open('logger.txt', 'a') as f:
+        f.write(f'\n {bwIMG[center[0], center[1]]}')
 
 
 # security function checking whether the operator is handling the material or not
@@ -270,8 +258,6 @@ def cameraUI():
         # cv.imshow("res",res)
 
         if showImageRGB == True:
-            resCol = cv.cvtColor(resCol, cv.COLOR_BGR2GRAY)
-            cv.circle(resCol, (int(resCol.shape[1]/2), int(resCol.shape[0]/2), 2, (255), cv.FILLED))
             cv.imshow('RGB', resCol)
             cv.waitKey(1)
 
