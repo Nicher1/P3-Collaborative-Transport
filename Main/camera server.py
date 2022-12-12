@@ -216,11 +216,16 @@ def test6123(color_image):
     print(bwIMG[center[0], center[1]])
 
     # if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
-    if bwIMG[center[0], center[1]] >= bwTRESH[0] and bwIMG[center[0], center[1]] <= bwTRESH[1]
+    if bwIMG[center[0], center[1]] >= bwTRESH[0] and bwIMG[center[0], center[1]] <= bwTRESH[1]:
         print("Whitin bounds")
     
     else:
         print("Out of bounds")
+
+    cv.circle(bwIMG, (int(bwIMG.shape[1]/2), int(bwIMG.shape[0]/2), 2, (255, 255, 0), cv.FILLED))
+    cv.imshow('bwIMG', bwIMG)
+    cv.waitKey(0)
+
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
