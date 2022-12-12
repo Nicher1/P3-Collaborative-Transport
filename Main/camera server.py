@@ -201,6 +201,19 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     # Send data
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
+def test6123(color_image):
+    center = [int(color_image.shape[1]/2), int(color_image.shape[0]/2)]
+
+    bThresh = [200, 255]
+    gThresh = [200, 255]
+    rThresh = [200, 255]
+
+    if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
+        print("Whitin bounds")
+    
+    else:
+        print("Out of bounds")
+
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
     try:
@@ -263,6 +276,8 @@ def cameraUI():
             meanx = unpackPackage[3]
             length = unpackPackage[4]
 
+            test6123()
+
             # print(length)
             if printXYZ == True:
                 global iteration
@@ -277,7 +292,7 @@ def cameraUI():
 
             state.state = 1
             
-            chckMaterial(capCol, [meany, meanx])
+           # chckMaterial(capCol, [meany, meanx])
 
         else:
             state.state = 0
