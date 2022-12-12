@@ -4,22 +4,23 @@ import numpy as np
 from PIDController.just_PID import PID
 import keyboard as kb
 from subprocess import Popen
+from collections import deque
 
 while True:
-    iteration = 0
-    while True:
-        if iteration == 0:
-            BAT_rail = Popen("rail server.bat")
-            time.sleep(5)
-            BAT_UR = Popen("UR10 server.bat")
-            time.sleep(5)
-            BAT_camera = Popen("Camera server.bat")
-            time.sleep(5)
-            print("To commence robot operation, press 'r'")
-        if kb.is_pressed("r"):
-            print("**ROBOT OPERATION COMMENCING**")
-            break
-        iteration += 1
+    # iteration = 0
+    # while True:
+    #     if iteration == 0:
+    #         BAT_rail = Popen("rail server.bat")
+    #         time.sleep(5)
+    #         BAT_UR = Popen("UR10 server.bat")
+    #         time.sleep(5)
+    #         BAT_camera = Popen("Camera server.bat")
+    #         time.sleep(5)
+    #         print("To commence robot operation, press 'r'")
+    #     if kb.is_pressed("r"):
+    #         print("**ROBOT OPERATION COMMENCING**")
+    #         break
+    #     iteration += 1
 
     while True:
         # Client code -------------------------------------------------------
@@ -141,10 +142,12 @@ while True:
                                         [0, 1, 0, 0],
                                         [0, 0, 1, 0],
                                         [0, 0, 0, 1]])
+        lastPosition = [0, 0, 0]
+        speedList = deque()
 
         while True:
+            startTime = time.time()
             # Step 1: Update all variables (attain current position, and human position from camera)
-
             T_robotbase_EE[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)  # Update UR10 position
             T_robotbase_EE[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)
             T_robotbase_EE[2, 3] = communicateUDP(ur10, 1, 2, nr_of_following_messages=0)
@@ -169,8 +172,6 @@ while True:
                 position_z = PIDz.update(feedback=towelPosGlobal[2], target=goalPos[2])
                 position_z = int(round(position_z))
 
-               # print(f"feedback_x: {towelPosGlobal[0]}, target_x: {goalPos[0]}, position_x: {position_x}")
-
                 # Step 3: Push new information to rail and UR10.
                 communicateUDP(rail, 12, rw=1, information=velocity_y)  # Target velocity for rail
                 communicateUDP(ur10, 1, 3, rw=1, information=position_x, nr_of_following_messages=1) # Target position x for UR10
@@ -194,3 +195,9 @@ while True:
                 communicateUDP(ur10, 1, 4, rw=1, information=position_z, nr_of_following_messages=0) # Target position z for UR10
                 communicateUDP(ur10, 2, 0, rw=1) # Execute ur10
 
+            endTime = time.time()
+            currentSpeed = np.sqrt((towelPosGlobal[0]-lastPosition[0])**2 + (towelPosGlobal[1]-lastPosition[1])**2 + (towelPosGlobal[2]-lastPosition[2])**2)/(endTime-startTime)
+            lastPosition = towelPosGlobal[0:3]
+            print(currentSpeed)
+            speedList.append(currentSpeed)
+            #print(f"currentSpeed: {currentSpeed}")
