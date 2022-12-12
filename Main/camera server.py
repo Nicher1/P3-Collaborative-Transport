@@ -46,8 +46,8 @@ drawCirclesDEPTH = False
 showImageDEPTH = False
 
 # RGB image settings
-drawCirclesRGB = False
-showImageRGB = False
+drawCirclesRGB = True
+showImageRGB = True
 
 # material image settings
 showImageMATERIAL = False
@@ -222,10 +222,6 @@ def test6123(color_image):
     else:
         print("Out of bounds")
 
-    cv.circle(bwIMG, (int(bwIMG.shape[1]/2), int(bwIMG.shape[0]/2), 2, (255, 255, 0), cv.FILLED))
-    cv.imshow('bwIMG', bwIMG)
-    cv.waitKey(0)
-
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
@@ -274,6 +270,8 @@ def cameraUI():
         # cv.imshow("res",res)
 
         if showImageRGB == True:
+            resCol = cv.cvtColor(resCol, cv.COLOR_BGR2GRAY)
+            cv.circle(resCol, (int(resCol.shape[1]/2), int(resCol.shape[0]/2), 2, (255), cv.FILLED))
             cv.imshow('RGB', resCol)
             cv.waitKey(1)
 
