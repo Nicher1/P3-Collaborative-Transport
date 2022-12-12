@@ -208,8 +208,7 @@ def test6123(color_image):
     center = [int(bwIMG.shape[1]/2), int(bwIMG.shape[0]/2)]
 
     with open('logger.txt', 'w') as f:
-        f.write(str(f'\n {bwIMG[center[0], center[1]]}'))
-
+        f.write(str(f'\n{bwIMG[center[0], center[1]]}'))
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
