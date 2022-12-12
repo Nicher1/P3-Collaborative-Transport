@@ -215,9 +215,9 @@ def test6123(color_image):
         print("Out of bounds")
 
 # security function checking whether the operator is handling the material or not
-def chckMaterial(ImageCOL, ImageDEPTH, means):
+def chckMaterial(Image, means):
     try:
-        ImageCopy = ImageCOL.copy()
+        ImageCopy = Image.copy()
         ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
         ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
         value = 0
@@ -236,7 +236,7 @@ def chckMaterial(ImageCOL, ImageDEPTH, means):
 
         valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
 
-        if valuepercent < 0.85 and ImageDEPTH[int(ImageBlur.shape[0]/2), int(ImageBlur.shape[1]/2)] < 710 and ImageDEPTH[int(ImageBlur.shape[0]/2), int(ImageBlur.shape[1]/2)] > 1120: state.state = 0
+        if valuepercent < 0.85: state.state = 0
 
         if showImageMATERIAL == True:
             cv.imshow("material checker", ImageBlur)
@@ -276,7 +276,7 @@ def cameraUI():
             meanx = unpackPackage[3]
             length = unpackPackage[4]
 
-           # test6123(capCol)
+            test6123(capCol)
 
             # print(length)
             if printXYZ == True:
@@ -292,7 +292,7 @@ def cameraUI():
 
             state.state = 1
             
-            chckMaterial(capCol, capTransDepth, [meany, meanx])
+           # chckMaterial(capCol, [meany, meanx])
 
         else:
             state.state = 0
