@@ -276,7 +276,7 @@ def cameraUI():
             meanx = unpackPackage[3]
             length = unpackPackage[4]
 
-            test6123()
+            test6123(capCol)
 
             # print(length)
             if printXYZ == True:
