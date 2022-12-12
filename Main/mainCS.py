@@ -6,6 +6,7 @@ import keyboard as kb
 from subprocess import Popen
 
 while True:
+    '''
     iteration = 0
     while True:
         if iteration == 0:
@@ -20,7 +21,7 @@ while True:
             print("**ROBOT OPERATION COMMENCING**")
             break
         iteration += 1
-
+    '''
     while True:
         # Client code -------------------------------------------------------
 
