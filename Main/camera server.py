@@ -218,15 +218,11 @@ def test6123(color_image):
 def chckMaterial(ImageCOL, ImageDEPTH, means):
     try:
         ImageCopy = ImageCOL.copy()
-        ImageCopyDEPTH = ImageDEPTH.copy()
         ImageGrey = cv.cvtColor(ImageCopy, cv.COLOR_BGR2GRAY)
         ImageCrop = ImageGrey[means[0]+50:means[0]+150, means[1]-75:means[1]+75]    
-        ImageCropDEPTH = ImageCopyDEPTH[means[0]+50:means[0]+150, means[1]-75:means[1]+75]
         value = 0
-        depth = []
         for y in range(ImageCrop.shape[0]):
             for x in range(ImageCrop.shape[1]):
-                depth.append[ImageCropDEPTH[y, x]]
                 if ImageCrop[y, x] <= 100:
                     ImageCrop[y, x] = 0
                 else:
@@ -238,12 +234,9 @@ def chckMaterial(ImageCOL, ImageDEPTH, means):
             for x in range(ImageBlur.shape[1]):
                     value = value+ImageBlur[y,x]
 
+        valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))/255
 
-        valuepercent = (value/(ImageBlur.shape[0]*ImageBlur.shape[1]))
-        averageDist = np.average(depth)
-        
-
-        if valuepercent < 0.85 and averageDist < 710 and averageDist > 1120: state.state = 0
+        if valuepercent < 0.85 and ImageDEPTH[int(ImageBlur.shape[0]/2), int(ImageBlur.shape[1]/2)] < 710 and ImageDEPTH[int(ImageBlur.shape[0]/2), int(ImageBlur.shape[1]/2)] > 1120: state.state = 0
 
         if showImageMATERIAL == True:
             cv.imshow("material checker", ImageBlur)
