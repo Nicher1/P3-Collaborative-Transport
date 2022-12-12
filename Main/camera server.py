@@ -207,7 +207,7 @@ def test6123(color_image):
     bwIMG = color_image.copy()
     bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
 
-    with open('logger.txt', 'a') as f:
+    with open('logger.txt', 'w') as f:
         f.write(f'\n {bwIMG[center[0], center[1]]}')
 
 
