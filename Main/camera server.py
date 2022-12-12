@@ -208,6 +208,8 @@ def test6123(color_image):
     gThresh = [200, 255]
     rThresh = [200, 255]
 
+    print(color_image[center[0], center[1]])
+
     if color_image[center[0], center[1], 0] <= bThresh[0] and color_image[center[0], center[1], 0] >= bThresh[2] and color_image[center[0], center[1], 1] <= gThresh[0] and color_image[center[0], center[1], 1] >= gThresh[1] and color_image[center[0], center[1], 2]  <= rThresh[0] and color_image[center[0], center[1], 2] >= rThresh[1]:
         print("Whitin bounds")
     
