@@ -208,7 +208,7 @@ def test6123(color_image):
     bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
 
     with open('logger.txt', 'w') as f:
-        f.write(f'\n {bwIMG[center[0], center[1]]}')
+        f.write(str(f'\n {bwIMG[center[0], center[1]]}'))
 
 
 # security function checking whether the operator is handling the material or not
