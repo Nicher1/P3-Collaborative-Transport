@@ -241,19 +241,19 @@ def cameraUI():
 
         start = perf_counter()
 
-        res, unpackPackage = detectHands(capCol, capTransDepth)
+        resCol, resDepth, unpackPackage = detectHands(capCol, capTransDepth)
 
-        res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
+        resCol = cv.cvtColor(resCol, cv.COLOR_RGB2BGR)
         end = perf_counter()
         # cv.imshow("res",res)
 
         if showImageRGB == True:
-            cv.imshow('RGB', capCol)
+            cv.imshow('RGB', resCol)
             cv.waitKey(1)
 
         if showImageDEPTH == True:
-            capTransDepth = colorize(capTransDepth, (None, 5000), cv.COLORMAP_HSV)
-            cv.imshow("transformed col to depth persceptive", capTransDepth)
+            resDepth = colorize(resDepth, (None, 5000), cv.COLORMAP_HSV)
+            cv.imshow("transformed col to depth persceptive", resDepth)
             cv.waitKey(1)
 
         if np.any(unpackPackage) != 0:
@@ -356,11 +356,11 @@ def detectHands(Input_img_col, Input_img_depth):
                           (int(255 / 20) * (col * 4), 255 - int(255 / 20) * (col * 5), 255), cv.FILLED)
                 cv.circle(imgCol, (handPos[3], handPos[2]), 4,
                           (int(255 / 20) * (col * 4), 255 - int(255 / 20) * (col * 5), 255), cv.FILLED)
-            return imgCol, returnPackage
+            return imgCol, imgDepth, returnPackage
 
     returnPackage = [0, 0, 0, 0, 0]
 
-    return imgCol, returnPackage
+    return imgCol, imgDepth, returnPackage
 
 
 def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi / 2), FOVy=1.03, xwidth=1280, yheight=720):

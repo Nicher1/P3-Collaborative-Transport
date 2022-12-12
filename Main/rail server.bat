@@ -1,1 +1,1 @@
-start python "rail server.py"
+start py "rail server.py"

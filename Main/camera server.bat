@@ -1,1 +1,1 @@
-start python "camera server.py"
+start py "camera server.py"
