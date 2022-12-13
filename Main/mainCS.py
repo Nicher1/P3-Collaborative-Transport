@@ -127,16 +127,13 @@ while True:
                                     [0, 1, 0, 0],
                                     [0, 0, 1, 0],
                                     [0, 0, 0, 1]])
-    orientation_data = open("orientationTest5.txt", "a")
-    orientation_vec = [0, 0, 0]
+    camera_data = open("DepthTest1.txt", "a")
 
     while True:
         # Step 1: Update all variables (attain current position, and human position from camera)
-        orientation_vec[0] = communicateUDP(ur10, 2, 3, nr_of_following_messages=5) #Read the orientation of the robot
-        orientation_vec[1] = communicateUDP(ur10, 2, 4, nr_of_following_messages=4)
-        orientation_vec[2] = communicateUDP(ur10, 2, 5, nr_of_following_messages=3)
-
-        np.savetxt(orientation_data, orientation_vec)
+        camera_vec[0] = communicateUDP(ur10, 2, 3, nr_of_following_messages=5) #Read the orientation of the robot
+        camera_vec[1] = communicateUDP(ur10, 2, 4, nr_of_following_messages=4)
+        camera_vec[2] = communicateUDP(ur10, 2, 5, nr_of_following_messages=3)
 
         T_robotbase_EE[0, 3] = communicateUDP(ur10, 1, 0, nr_of_following_messages=2)  # Update UR10 position
         T_robotbase_EE[1, 3] = communicateUDP(ur10, 1, 1, nr_of_following_messages=1)
@@ -146,7 +143,7 @@ while True:
 
         recieveAndUnpack(camera)  # Collect the latest information from the camera, and store it in cameraData
         humanPosGlobal = np.matmul(np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_camera),cameraData.currentPos)
-
+        np.savetxt(camera_data, cameraData.currentPos)
         towelPosGlobal = np.matmul(np.matmul(T_global_robotbase,T_robotbase_EE),T_EE_towel) # The current position of our towel/end effector in global frame.
 
         # Step 2: Calculate goal position and push it through PID controller for X, Y and Z axis.
