@@ -8,6 +8,7 @@ from helpers import colorize
 import pyk4a as pyk
 import socket
 import time
+from collections import deque
 
 # Addresses and ports
 localAddress = "127.0.0.1"
@@ -20,6 +21,7 @@ CLIENT_PORT = 20005  # Define which port on the client the server is going to co
 server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 server.bind((localAddress, SERVER_PORT))
 
+f = open("distanceTest1.txt","a")
 
 #####################################################################
 ###########################    CLASSES    ###########################
@@ -202,14 +204,13 @@ def communicateUDPcamera(object, subindex=0, rw=0, information=0, nr_of_followin
     server.sendto(package_array, (localAddress, CLIENT_PORT))
 
 def test6123(color_image):
-    center = [int(color_image.shape[1]/2), int(color_image.shape[0]/2)]
 
     bwIMG = color_image.copy()
     bwIMG = cv.cvtColor(bwIMG, cv.COLOR_BGR2GRAY)
+    bwIMGcenter = bwIMG[357:363, 637:643]
+    bwIMGcenterAverage = np.sum(bwIMGcenter)/(bwIMGcenter.shape[0]*bwIMGcenter.shape[1])
 
-    with open('logger.txt', 'w') as f:
-        f.write(f'\n {bwIMG[center[0], center[1]]}')
-
+    registreredBrightness.append(bwIMGcenterAverage)
 
 # security function checking whether the operator is handling the material or not
 def chckMaterial(Image, means):
@@ -387,7 +388,9 @@ def pixelDist2EucDist(xp, yp, h, FOVx=(np.pi / 2), FOVy=1.03, xwidth=1280, yheig
     return pos
 
 def main():
-    while True:
+    startTime = time.time()
+    currentTime = 0
+    while (currentTime-startTime)<120:
         try:
             cameraUI()
             communicateUDPcamera(21, 0, 1, pos.position[0], nr_of_following_messages=3)
@@ -400,6 +403,11 @@ def main():
             communicateUDPcamera(21, 1, 1, pos.position[1], nr_of_following_messages=2)
             communicateUDPcamera(21, 2, 1, pos.position[2], nr_of_following_messages=1)
             communicateUDPcamera(22, 0, 1, state.state, nr_of_following_messages=0)
+        currentTime = time.time()
+
+registreredBrightness = deque()
 
 if __name__ == '__main__':
     main()
+    registreredBrightness = np.array(registreredBrightness)
+    np.savetxt("registreredBrightness7", registreredBrightness)
