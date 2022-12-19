@@ -5,11 +5,15 @@ Welcome to the AAU University project on maintaining stable pressure on non-rigi
 
 All relevant code for this project can be found in the Main folder located at the following link:
 
-https://github.com/Nicher1/P3-Collaborative-Transport/blob/95df5bf0ba947747f3151effd0d1978839cc6ece/Main
-
-Copy code
+[Main folder](https://github.com/Nicher1/P3-Collaborative-Transport/blob/95df5bf0ba947747f3151effd0d1978839cc6ece/Main)
 
 **Please note that this code is for reference only and should not be modified or altered in any way.**
+
+Pay special attention to the following files in the main folder:
+* `MainCS.py`
+* `camera server.py`
+* `UR10 server.py`
+* `rail server.py`
 
 ## Collaborators
 * Magnus Knudsen
