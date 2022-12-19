@@ -1,1 +1,0 @@
-start py "UR10 server.py"
